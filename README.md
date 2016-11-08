@@ -20,8 +20,7 @@ Simple stacking package for Python and tutorial
 * So there are 3 pictures - one for each fold.
 * After 3 folds we will have one feature (one column) for *new* train set to fit 2-nd level model on and
     one feature (one column) for *new* test set to predict with 2-nd level model.
-* If we repeat all this cycle with other 1-st level model - we will get another one feature for 2-nd level model and so on.
-
+* If we repeat this cycle with other 1-st level model - we will get another feature for 2-nd level model and so on.
 
 ***
 ![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
