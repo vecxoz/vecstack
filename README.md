@@ -4,6 +4,8 @@ Simple stacking package for Python and tutorial
 ***
 
 # Short stacking tutorial
+
+## Main ideas
 * Main idea of stacking: 
   * Fit some models (1-st level) on initial train set.
   * Predict initial train set and test set with this model. 
@@ -15,7 +17,7 @@ Simple stacking package for Python and tutorial
 * Solution to overfitting:
   * Use cross-validation technique to predict out-of-fold part of train set in each fold.
   
-# Let's look on example below
+## Let's look on example below
 * Here we have stacking implemented for single 1-st level model and 3-fold cross-validation.
 * So there are 3 pictures - one for each fold.
 * After 3 folds we will have one feature (one column) for *new* train set to fit 2-nd level model on and
