@@ -1,5 +1,5 @@
 # vecstack
-Simple stacking package for Python and tutorial
+Simple stacking package for Python and tutorial (look below).
 
 ***
 
