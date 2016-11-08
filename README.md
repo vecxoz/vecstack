@@ -3,15 +3,15 @@ Simple stacking package for Python and tutorial
 
 ***
 So there is short stacking tutorial.
-Main idea of stacking: 
-  Fit some model (1-st level) on initial train set.
-  Predict initial train and test set with this model. 
-  Make **new** train and test sets of this predictions.
-  Fit some other model (2-nd level) on **new** train set and predict **new** test set.
-  Prediction for **new** test set is our final target prediction.
-Main pitfall:
-  If we will fit 1-st level model on train set and predict train set - we will get overfitting.
-Solution to overfitting:
+* Main idea of stacking: 
+*  Fit some model (1-st level) on initial train set.
+*  Predict initial train and test set with this model. 
+*  Make **new** train and test sets of this predictions.
+*  Fit some other model (2-nd level) on **new** train set and predict **new** test set.
+*  Prediction for **new** test set is our final target prediction.
+* Main pitfall:
+*  If we will fit 1-st level model on train set and predict train set - we will get overfitting.
+* Solution to overfitting:
   
 
 ***
