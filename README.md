@@ -24,9 +24,7 @@ Simple stacking package for Python and tutorial
     one feature (one column) for *new* test set to predict with 2-nd level model.
 * If we repeat this cycle with other 1-st level model - we will get another feature for 2-nd level model and so on.
 
-
-
-
+***
 ![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
 ***
 ![stack2](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia2.png "Fold 2 of 3")
