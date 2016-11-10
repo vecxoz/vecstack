@@ -17,10 +17,6 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 8. We can repeat this cycle using other 1-st level models to get more features for 2-nd level model.
 
 ***
-
-* It's handy to watch this pictures successively in some image viewer, so you better see the changes from one picture to another.
-
-***
 ![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
 ***
 ![stack2](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia2.png "Fold 2 of 3")
