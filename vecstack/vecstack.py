@@ -1,2 +1,2 @@
 def func():
-return ('Hello')
+  return ('Hello')
