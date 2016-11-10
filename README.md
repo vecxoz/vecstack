@@ -2,6 +2,11 @@
 Python package for stacking (machine learning technique).  
 Below you can find [how to use](https://github.com/vecxoz/vecstack#how-to-use) package and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.
 
+# Dependencies
+* numpy
+* scipy
+* scikit-learn
+
 # How to use
 
 # Stacking concept
