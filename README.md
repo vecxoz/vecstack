@@ -1,5 +1,6 @@
 # vecstack
 Python package for stacking (machine learning technique).  
+Can be used with any sklearn-like models.  
 Below you can find [how to use](https://github.com/vecxoz/vecstack#how-to-use) package and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.  
 Dependencies: *numpy*, *scipy*, *scikit-learn*.
 
