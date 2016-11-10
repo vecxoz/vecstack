@@ -1,9 +1,10 @@
 # vecstack
-Simple stacking package for Python and tutorial (look below).
+Python package for stacking (machine learning technique).  
+Below you can find how to use package and explanation of stacking concept with pictures.
 
-***
+# How to use
 
-# Stacking idea
+# Stacking concept
 
 1. We want to predict train and test sets with some 1-st level model(s), and then use this predictions as features for 2-nd level model.
 2. Any model can be used as 1-st level model or 2-nd level model.
