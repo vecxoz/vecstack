@@ -16,6 +16,7 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 7. Tree pictures below describe three folds of cross-validation. After complition of all three folds we get single train feature and single test feature to use with 2-nd level model.
 8. We can repeat this cycle using other 1-st level models to get more features for 2-nd level model.  
 
+***
 ![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
 ***
 ![stack2](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia2.png "Fold 2 of 3")
