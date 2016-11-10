@@ -19,12 +19,12 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack/blob/master/README.md#animation).
 
 ***
-![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
+![stack1](https://github.com/vecxoz/vecstack/blob/master/pic/dia1.png "Fold 1 of 3")
 ***
-![stack2](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia2.png "Fold 2 of 3")
+![stack2](https://github.com/vecxoz/vecstack/blob/master/pic/dia2.png "Fold 2 of 3")
 ***
-![stack3](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia3.png "Fold 3 of 3")
+![stack3](https://github.com/vecxoz/vecstack/blob/master/pic/dia3.png "Fold 3 of 3")
 ***
 
 # Animation
-![animation](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia.gif "Animation")
+![animation](https://github.com/vecxoz/vecstack/blob/master/pic/dia.gif "Animation")
