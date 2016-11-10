@@ -1,2 +1,2 @@
-def joke():
+def func():
     return ('Hello')
