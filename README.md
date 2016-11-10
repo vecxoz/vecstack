@@ -15,7 +15,7 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 6. As an example we look at stacking implemented with single 1-st level model and 3-fold cross-validation.
 7. Tree pictures below describe three folds of cross-validation. After complition of all three folds we get single train feature and single test feature to use with 2-nd level model.
 8. We can repeat this cycle using other 1-st level models to get more features for 2-nd level model.
-9. At the bottom you can see GIF animation.
+9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack/blob/master/README.md#animation).
 
 ***
 ![stack1](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia1.png "Fold 1 of 3")
