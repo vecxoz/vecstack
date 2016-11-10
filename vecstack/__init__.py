@@ -1,4 +1,4 @@
 """Python module for stacking
 """
-from .this import func
+from .vs import func
 __version__ = '0.1'
