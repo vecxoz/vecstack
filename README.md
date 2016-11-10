@@ -3,6 +3,30 @@ Simple stacking package for Python and tutorial (look below).
 
 ***
 
+# Stacking idea
+
+We want to predict train and test sets with some 1-st level model(s),
+and then use this predictions as features for 2-nd level model.
+
+Any model can be used as 1-st level model or 2-nd level model.
+
+To avoid overfitting (for train set) we use cross-validation 
+technique and in each fold we predict out-of-fold part of train set.
+
+In each fold we predict full test set, so after complition 
+of all folds we need to find mean of all test set predictions
+made in each fold.
+
+Three pictures below describe one full cross-validation
+cycle (3 folds) for single 1-st level model. After its complition 
+we get single train feature and single test feature 
+to use with 2-nd level model.
+
+We can repeat this cycle using other 1-st level models to get 
+more features for 2-nd level model.
+
+***
+
 # Short stacking tutorial
 
 ## Main ideas
