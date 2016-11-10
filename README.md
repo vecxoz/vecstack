@@ -24,4 +24,6 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 ***
 ![stack3](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia3.png "Fold 3 of 3")
 ***
-![animation]()
+
+# Animation
+![animation](https://github.com/vecxoz/vecstack/blob/master/tutorial/dia.gif "Animation")
