@@ -1,6 +1,6 @@
 # vecstack
 Python package for stacking (machine learning technique).  
-Below you can find how to use package and explanation of stacking concept with pictures.
+Below you can find how to use package and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.
 
 # How to use
 
