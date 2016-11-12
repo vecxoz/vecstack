@@ -1,5 +1,5 @@
 # vecstack
-Python module for stacking (machine learning technique).  
+Python package for stacking (machine learning technique).  
 Can be used with any sklearn-like models.  
 Can be used for classification and regression tasks.  
 Below you can find [how to use](https://github.com/vecxoz/vecstack#how-to-use) module and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.  
