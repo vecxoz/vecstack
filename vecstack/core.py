@@ -1,1 +1,2 @@
-
+def func():
+    return 'Hello'
