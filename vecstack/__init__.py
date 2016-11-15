@@ -1,1 +1,1 @@
-from .core import func
+from .core import stacking
