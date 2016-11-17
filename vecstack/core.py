@@ -67,9 +67,9 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         if False - perfrom stacking for classification task
         
     log_transform : boolean, default False, meaningful only for regression task
-        If True - use numpy.log1p transform for y_train and then numpy.expm1 
+        If True - use numpy.log1p transform for target and then numpy.expm1 
             transform for predictions
-        Useful when y_train is skewed.
+        Useful when target is skewed.
         
     feval : callable, default None
         Score function (evaluation metric) which is used to calculate 
@@ -128,7 +128,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     5. In each fold we predict full test set, so after completion of all folds 
        we need to find mean (mode) of all test set predictions made in each fold.
     
-    You can find example with pictures at
+    You can find further stacking explanation with pictures at
     https://github.com/vecxoz/vecstack
     
     Examples
@@ -149,9 +149,9 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         
     # Split indices to get folds (stratified is possible only for classification)
     if stratified and not regression:
-        kf = list(StratifiedKFold(y_train, n_folds, shuffle = shuffle, random_state = random_state))
+        kf = StratifiedKFold(y_train, n_folds, shuffle = shuffle, random_state = random_state)
     else:
-        kf = list(KFold(len(y_train), n_folds, shuffle = shuffle, random_state = random_state))
+        kf = KFold(len(y_train), n_folds, shuffle = shuffle, random_state = random_state)
 
     # Create empty numpy arrays for stacking features
     S_train = np.zeros((len(X_train), len(models)))
