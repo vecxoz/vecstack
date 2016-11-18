@@ -40,7 +40,7 @@ def expm1(y, do = False):
 #-------------------------------------------------------------------------------
 
 def stacking(models, X_train, y_train, X_test, regression = True, 
-    log_transform = False, feval = None, n_folds = 4, stratified = False, 
+    log_transform = False, metric = None, n_folds = 4, stratified = False, 
     shuffle = False, random_state = 0, verbose = 0):
     """Function 'stacking' takes train data, test data and list of 1-st level
     models, and return stacking features, which can be used with 2-nd level model.
@@ -71,16 +71,16 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             transform for predictions
         Useful when target is skewed.
         
-    feval : callable, default None
-        Score function (evaluation metric) which is used to calculate 
+    metric : callable, default None
+        Evaluation metric (score function) which is used to calculate 
         results of cross-validation.
         If None, then by default:
             for regression - mean_absolute_error,
             for classification - accuracy_score
-        You can use any function or define your own function like shown below:
+        You can use any sklearn metric or define your own metric like shown below:
         
-        def mae(y_true, y_pred):
-            return numpy.mean(numpy.abs(y_true - y_pred))
+        def root_mean_square_error(y_true, y_pred):
+            return numpy.sqrt(numpy.mean(numpy.power(y_true - y_pred, 2)))
         
     n_folds : int, default 4
         Number of folds in cross-validation
@@ -100,6 +100,11 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         1 - show single score for each 1-st level model,
         2 - show score for each fold of each 1-st level model
         
+        Caution. To calculate MEAN score across all folds 
+        full train set prediction and full true target are used.
+        So for some metrics (e.g. rmse) this value may not be equal 
+        to mean of score values calculated for each fold.
+        
     Returns
     -------
     S_train : numpy array of shape [n_train_samples, n_models]
@@ -116,6 +121,8 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     # For classification
     S_train, S_test = stacking(models, X_train, y_train, X_test, 
         regression = False, verbose = 2)
+        
+    Complete examples - see below. 
     
     Stacking concept
     ----------------
@@ -135,17 +142,25 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     --------
     
     """
-    # Whether to use log1p/expm1 transformations
+    if regression and verbose > 0:
+        print('task:   [regression]')
+    elif not regression and verbose > 0:
+        print('task:   [classification]')
+    
+    # Whether to use log1p/expm1 transformations (possible only for regression)
     if log_transform and regression:
         do = True
     else:
         do = False
 
     # Specify default score function for cross-validation
-    if feval is None and regression:
-        feval = mean_absolute_error
-    elif feval is None and not regression:
-        feval = accuracy_score
+    if metric is None and regression:
+        metric = mean_absolute_error
+    elif metric is None and not regression:
+        metric = accuracy_score
+        
+    if verbose > 0:
+        print('metric: [%s]\n' % metric.__name__)
         
     # Split indices to get folds (stratified is possible only for classification)
     if stratified and not regression:
@@ -160,7 +175,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     # Loop across models
     for model_counter, model in enumerate(models):
         if verbose > 0:
-            print('[model %d: %s] [eval metric: %s]' % (model_counter, model.__class__.__name__, feval.func_name))
+            print('model %d: [%s]' % (model_counter, model.__class__.__name__))
             
         # Create empty numpy array, which will contain temporary predictions for test set made in each fold
         S_test_temp = np.zeros((len(X_test), len(kf)))
@@ -180,7 +195,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             S_test_temp[:, fold_counter] = expm1(model.predict(X_test), do = do)
             
             if verbose > 1:
-                print('    fold %d: [%.8f]' % (fold_counter, feval(y_te, S_train[te_index, model_counter])))
+                print('    fold %d: [%.8f]' % (fold_counter, metric(y_te, S_train[te_index, model_counter])))
                 
         # Compute mean or mode of predictions for test set
         if regression:
@@ -189,8 +204,8 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             S_test[:, model_counter] = st.mode(S_test_temp, axis = 1)[0].ravel()
             
         if verbose > 0:
-            print('    ----')
-            print('    TOTAL:  [%.8f]\n' % (feval(y_train, S_train[:, model_counter])))
+            print('    --------------------')
+            print('    MEAN:   [%.8f]\n' % (metric(y_train, S_train[:, model_counter])))
 
     return (S_train, S_test)
 
