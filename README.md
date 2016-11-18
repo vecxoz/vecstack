@@ -7,6 +7,89 @@ Dependencies: *numpy*, *scipy*, *scikit-learn*.
 
 # How to use
 
+## Regression
+
+```python
+from sklearn.datasets import load_boston
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import mean_absolute_error
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from vecstack import stacking
+
+# Load demo data
+boston = load_boston()
+X, y = boston.data, boston.target
+
+# Make train/test split
+# As usual in machine learning task we have X_train, y_train, and X_test
+X_train, X_test, y_train, y_test = train_test_split(X, y, 
+    test_size = 0.2, random_state = 0)
+
+# Caution! All models and parameter values are just 
+# demonstrational and shouldn't be considered as recommended.
+# Initialize 1-st level models.
+models = [
+    ExtraTreesRegressor(random_state = 0, n_jobs = -1, 
+        n_estimators = 100, max_depth = 3),
+        
+    RandomForestRegressor(random_state = 0, n_jobs = -1, 
+        n_estimators = 100, max_depth = 3),
+        
+    XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+        n_estimators = 100, max_depth = 3)]
+    
+# Compute stacking features
+S_train, S_test = stacking(models, X_train, y_train, X_test, 
+    regression = True, metric = mean_absolute_error, n_folds = 4, 
+    shuffle = True, random_state = 0, verbose = 2)
+
+# Initialize 2-nd level model
+model = XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+    n_estimators = 100, max_depth = 3)
+    
+# Fit 2-nd level model
+model = model.fit(S_train, y_train)
+
+# Predict
+y_pred = model.predict(S_test)
+
+# Final prediction score
+print('Final prediction score: [%.8f]' % mean_absolute_error(y_test, y_pred))
+```
+
+```
+task:   [regression]
+metric: [mean_absolute_error]
+
+model 0: [ExtraTreesRegressor]
+    fold 0: [3.20733439]
+    fold 1: [2.87943130]
+    fold 2: [2.53026486]
+    fold 3: [2.83618694]
+    --------------------
+    MEAN:   [2.86330437]
+
+model 1: [RandomForestRegressor]
+    fold 0: [3.11110485]
+    fold 1: [2.78404210]
+    fold 2: [2.55707729]
+    fold 3: [2.32209992]
+    --------------------
+    MEAN:   [2.69358104]
+
+model 2: [XGBRegressor]
+    fold 0: [2.40318939]
+    fold 1: [2.37286982]
+    fold 2: [1.89121530]
+    fold 3: [1.95382831]
+    --------------------
+    MEAN:   [2.15527571]
+    
+Final prediction score: [2.78409065]
+```
+
 # Stacking concept
 
 1. We want to predict train and test sets with some 1-st level model(s), and then use this predictions as features for 2-nd level model.  
