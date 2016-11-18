@@ -90,6 +90,89 @@ model 2: [XGBRegressor]
 Final prediction score: [2.78409065]
 ```
 
+## Classification
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from vecstack import stacking
+
+# Load demo data
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# Make train/test split
+# As usual in machine learning task we have X_train, y_train, and X_test
+X_train, X_test, y_train, y_test = train_test_split(X, y, 
+    test_size = 0.2, random_state = 0)
+
+# Caution! All models and parameter values are just 
+# demonstrational and shouldn't be considered as recommended.
+# Initialize 1-st level models.
+models = [
+    ExtraTreesClassifier(random_state = 0, n_jobs = -1, 
+        n_estimators = 100, max_depth = 3),
+        
+    RandomForestClassifier(random_state = 0, n_jobs = -1, 
+        n_estimators = 100, max_depth = 3),
+        
+    XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+        n_estimators = 100, max_depth = 3)]
+    
+# Compute stacking features
+S_train, S_test = stacking(models, X_train, y_train, X_test, 
+    regression = False, metric = accuracy_score, n_folds = 4, 
+    stratified = True, shuffle = True, random_state = 0, verbose = 2)
+
+# Initialize 2-nd level model
+model = XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+    n_estimators = 100, max_depth = 3)
+    
+# Fit 2-nd level model
+model = model.fit(S_train, y_train)
+
+# Predict
+y_pred = model.predict(S_test)
+
+# Final prediction score
+print('Final prediction score: [%.8f]' % accuracy_score(y_test, y_pred))
+```
+
+```
+task:   [classification]
+metric: [accuracy_score]
+
+model 0: [ExtraTreesClassifier]
+    fold 0: [0.93548387]
+    fold 1: [0.96666667]
+    fold 2: [1.00000000]
+    fold 3: [0.89655172]
+    --------------------
+    MEAN:   [0.95000000]
+
+model 1: [RandomForestClassifier]
+    fold 0: [0.87096774]
+    fold 1: [0.96666667]
+    fold 2: [1.00000000]
+    fold 3: [0.93103448]
+    --------------------
+    MEAN:   [0.94166667]
+
+model 2: [XGBClassifier]
+    fold 0: [0.83870968]
+    fold 1: [0.93333333]
+    fold 2: [1.00000000]
+    fold 3: [0.93103448]
+    --------------------
+    MEAN:   [0.92500000]
+    
+Final prediction score: [0.96666667]
+```
+
 # Stacking concept
 
 1. We want to predict train and test sets with some 1-st level model(s), and then use this predictions as features for 2-nd level model.  
