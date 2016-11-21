@@ -15,7 +15,7 @@ Below you can find
 * Complete examples for [regression](https://github.com/vecxoz/vecstack#regression) and [classification](https://github.com/vecxoz/vecstack#classification)
 * Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
 
-You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L52) or just type ```>>>help(stacking)```
+You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L61) or just type ```>>>help(stacking)```
 
 # Installation
 installation
@@ -28,10 +28,10 @@ from vecstack import stacking
 
 # Initialize 1-st level models
 
-# Get your stacking features
+# Get your stacking features in a single line
 S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True, verbose = 2)
 
-# Use 2-nd level model with stacking fetures
+# Use 2-nd level model with stacking features
 ```
 
 # Complete examples
