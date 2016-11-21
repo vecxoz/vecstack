@@ -2,7 +2,7 @@
 Python package for stacking (machine learning technique).
 * Accept any sklearn-like models
 * Perform classification and regression tasks
-* Easy to use. Get your stacking features with a single line ```S_train, S_test = stacking(models, X_train, y_train, X_test)```
+* Easy to use. Perform stacking with a single line ```S_train, S_test = stacking(models, X_train, y_train, X_test)```
 * Python 2, Python 3
 * Win, Linux, Mac
 * MIT license
