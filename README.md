@@ -29,7 +29,7 @@ from vecstack import stacking
 # Initialize 1-st level models
 
 # Get your stacking features
-S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True)
+S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True, verbose = 2)
 
 # Use 2-nd level model with stacking fetures
 ```
