@@ -8,9 +8,12 @@ Python package for stacking (machine learning technique).
 * MIT license
 * Depend on **numpy**, **scipy**, **scikit-learn**
 
-Below you can find [how to use](https://github.com/vecxoz/vecstack#how-to-use) package and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.
+Below you can find [installation](https://github.com/vecxoz/vecstack#installation) notes, [complete examples](https://github.com/vecxoz/vecstack#complete-examples) and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.
 
-# How to use
+# Installation
+>
+
+# Complete examples
 
 ## Regression
 
