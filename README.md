@@ -1,12 +1,13 @@
 # vecstack
 Python package for stacking (machine learning technique)
-* Accept any sklearn-like models
+* Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#brief-example)
+* Use any sklearn-like models
 * Perform classification and regression tasks
-* Easy to use. Perform stacking with a [single line](https://github.com/vecxoz/vecstack#brief-example)
+* Use any user defined transformations for target and prediction
 * Python 2, Python 3
 * Win, Linux, Mac
 * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
-* Depend on **numpy**, **scipy**, **scikit-learn**
+* Depends on **numpy**, **scipy**, **scikit-learn**
 
 Below you can find
 * [Installation](https://github.com/vecxoz/vecstack#installation) guide
@@ -96,7 +97,7 @@ model 0: [ExtraTreesRegressor]
     fold 1: [2.87943130]
     fold 2: [2.53026486]
     fold 3: [2.83618694]
-    --------------------
+    ----
     MEAN:   [2.86330437]
 
 model 1: [RandomForestRegressor]
@@ -104,7 +105,7 @@ model 1: [RandomForestRegressor]
     fold 1: [2.78404210]
     fold 2: [2.55707729]
     fold 3: [2.32209992]
-    --------------------
+    ----
     MEAN:   [2.69358104]
 
 model 2: [XGBRegressor]
@@ -112,7 +113,7 @@ model 2: [XGBRegressor]
     fold 1: [2.37286982]
     fold 2: [1.89121530]
     fold 3: [1.95382831]
-    --------------------
+    ----
     MEAN:   [2.15527571]
     
 Final prediction score: [2.78409065]
@@ -179,7 +180,7 @@ model 0: [ExtraTreesClassifier]
     fold 1: [0.96666667]
     fold 2: [1.00000000]
     fold 3: [0.89655172]
-    --------------------
+    ----
     MEAN:   [0.95000000]
 
 model 1: [RandomForestClassifier]
@@ -187,7 +188,7 @@ model 1: [RandomForestClassifier]
     fold 1: [0.96666667]
     fold 2: [1.00000000]
     fold 3: [0.93103448]
-    --------------------
+    ----
     MEAN:   [0.94166667]
 
 model 2: [XGBClassifier]
@@ -195,7 +196,7 @@ model 2: [XGBClassifier]
     fold 1: [0.93333333]
     fold 2: [1.00000000]
     fold 3: [0.93103448]
-    --------------------
+    ----
     MEAN:   [0.92500000]
     
 Final prediction score: [0.96666667]
