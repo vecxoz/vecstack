@@ -10,4 +10,9 @@ setup(name='vecstack',
       author_email='vecxoz@gmail.com',
       license='MIT',
       packages=['vecstack'],
+      install_requires=[
+          'numpy',
+          'scipy',
+          'scikit-learn'
+      ],
       zip_safe=False)
