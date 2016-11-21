@@ -4,10 +4,10 @@ from setuptools import setup
 
 setup(name='vecstack',
       version='0.1',
-      description='Python package for stacking',
+      description='Python package for stacking (machine learning technique)',
       url='https://github.com/vecxoz/vecstack',
       author='vecxoz',
       author_email='vecxoz@gmail.com',
-      license='GPL',
+      license='MIT',
       packages=['vecstack'],
       zip_safe=False)
