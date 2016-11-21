@@ -12,7 +12,9 @@ Below you can find
 * [Installation](https://github.com/vecxoz/vecstack#installation) guide
 * [Brief example](https://github.com/vecxoz/vecstack#brief-example)
 * Complete examples for [regression](https://github.com/vecxoz/vecstack#regression) and [classification](https://github.com/vecxoz/vecstack#classification)
-* Explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
+* Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
+
+You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L52) or just type ```>>>help(stacking)```
 
 # Installation
 installation
