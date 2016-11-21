@@ -1,17 +1,35 @@
 # vecstack
-Python package for stacking (machine learning technique).
+Python package for stacking (machine learning technique)
 * Accept any sklearn-like models
 * Perform classification and regression tasks
-* Easy to use. Perform stacking with a single line ```S_train, S_test = stacking(models, X_train, y_train, X_test)```
+* Easy to use. Perform stacking with a [single line](https://github.com/vecxoz/vecstack#brief-example)
 * Python 2, Python 3
 * Win, Linux, Mac
-* MIT license
+* [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
 * Depend on **numpy**, **scipy**, **scikit-learn**
 
-Below you can find [installation](https://github.com/vecxoz/vecstack#installation) notes, [complete examples](https://github.com/vecxoz/vecstack#complete-examples) and explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures.
+Below you can find
+* [Installation](https://github.com/vecxoz/vecstack#installation) guide
+* [Brief example](https://github.com/vecxoz/vecstack#brief-example)
+* Complete examples for [regression](https://github.com/vecxoz/vecstack#regression) and [classification](https://github.com/vecxoz/vecstack#classification)
+* Explanation of [stacking concept](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
 
 # Installation
->
+installation
+
+# Brief example
+```python
+from vecstack import stacking
+
+# Get your data
+
+# Initialize 1-st level models
+
+# Get your stacking features
+S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True)
+
+# Use 2-nd level model with stacking fetures
+```
 
 # Complete examples
 
