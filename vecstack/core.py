@@ -1,5 +1,27 @@
-"""Python package for stacking.
-Author: <vecxoz@gmail.com>
+"""
+MIT License
+
+Vecstack. Python package for stacking (machine learning technique)
+Copyright (c) 2016 vecxoz
+Email: vecxoz@gmail.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 #-------------------------------------------------------------------------------
@@ -15,32 +37,21 @@ from sklearn.metrics import accuracy_score
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-def log1p(y, do = False):
+def transformer(y, func = None):
     """
-    Wrapper for numpy.log1p
+    Used to transform target variable and prediction
     """
-    if do:
-        return np.log1p(y)
-    else:
+    if func is None:
         return y
-        
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-        
-def expm1(y, do = False):
-    """
-    Wrapper for numpy.expm1
-    """
-    if do:
-        return np.expm1(y)
     else:
-        return y
+        return func(y)
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
 def stacking(models, X_train, y_train, X_test, regression = True, 
-    log_transform = False, metric = None, n_folds = 4, stratified = False, 
+    transform_target = None, transform_pred = None,
+    metric = None, n_folds = 4, stratified = False, 
     shuffle = False, random_state = 0, verbose = 0):
     """Function 'stacking' takes train data, test data and list of 1-st level
     models, and return stacking features, which can be used with 2-nd level model.
@@ -66,10 +77,26 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         If True - perform stacking for regression task, 
         if False - perform stacking for classification task
         
-    log_transform : boolean, default False, meaningful only for regression task
-        If True - use numpy.log1p transform for target and then numpy.expm1 
-            transform for predictions
-        Useful when target is skewed.
+    transform_target : callable, default None
+        Function to transform target variable.
+        If None - transformation is not used.
+        For example, for regression task (if target variable is skewed)
+            you can use transformation like numpy.log
+        Usually you want to use respective backward transformation 
+            for prediction like numpy.exp. To do so set 
+            transform_pred = numpy.exp
+        Caution! Some transformations may give inapplicable results. 
+            For example, if target variable contains zeros numpy.log 
+            gives you -inf. In such case you can use appropriate 
+            transformation like numpy.log1p and respective
+            backward transformation like numpy.expm1
+        
+    transform_pred : callable, default None
+        Function to transform prediction.
+        If None - transformation is not used.
+        If you use transformation for target variable 
+        like numpy.log, then using transform_pred you can specify 
+        respective backward transformation, like numpy.exp
         
     metric : callable, default None
         Evaluation metric (score function) which is used to calculate 
@@ -242,27 +269,23 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     # Final prediction score
     print('Final prediction score: [%.8f]' % accuracy_score(y_test, y_pred))
     """
+    # Print type of task
     if regression and verbose > 0:
         print('task:   [regression]')
     elif not regression and verbose > 0:
         print('task:   [classification]')
-    
-    # Whether to use log1p/expm1 transformations (possible only for regression)
-    if log_transform and regression:
-        do = True
-    else:
-        do = False
 
-    # Specify default score function for cross-validation
+    # Specify default metric for cross-validation
     if metric is None and regression:
         metric = mean_absolute_error
     elif metric is None and not regression:
         metric = accuracy_score
         
+    # Print metric
     if verbose > 0:
         print('metric: [%s]\n' % metric.__name__)
         
-    # Split indices to get folds (stratified is possible only for classification)
+    # Split indices to get folds (stratified can be used only for classification)
     if stratified and not regression:
         kf = StratifiedKFold(y_train, n_folds, shuffle = shuffle, random_state = random_state)
     else:
@@ -288,11 +311,11 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             y_te = y_train[te_index]
             
             # Fit 1-st level model
-            model = model.fit(X_tr, log1p(y_tr, do = do))
+            model = model.fit(X_tr, transformer(y_tr, func = transform_target))
             # Predict out-of-fold part of train set
-            S_train[te_index, model_counter] = expm1(model.predict(X_te), do = do)
+            S_train[te_index, model_counter] = transformer(model.predict(X_te), func = transform_pred)
             # Predict full test set
-            S_test_temp[:, fold_counter] = expm1(model.predict(X_test), do = do)
+            S_test_temp[:, fold_counter] = transformer(model.predict(X_test), func = transform_pred)
             
             if verbose > 1:
                 print('    fold %d: [%.8f]' % (fold_counter, metric(y_te, S_train[te_index, model_counter])))
@@ -304,7 +327,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             S_test[:, model_counter] = st.mode(S_test_temp, axis = 1)[0].ravel()
             
         if verbose > 0:
-            print('    --------------------')
+            print('    ----')
             print('    MEAN:   [%.8f]\n' % (metric(y_train, S_train[:, model_counter])))
 
     return (S_train, S_test)
