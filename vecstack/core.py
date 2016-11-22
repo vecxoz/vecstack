@@ -1,7 +1,11 @@
-"""
+"""Python package for stacking (machine learning technique)
+
+Find out how to use:
+>>>from vecstack import stacking
+>>>help(stacking)
+
 MIT License
 
-Vecstack. Python package for stacking (machine learning technique)
 Copyright (c) 2016 vecxoz
 Email: vecxoz@gmail.com
 
@@ -37,10 +41,8 @@ from sklearn.metrics import accuracy_score
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-def transformer(y, func = None):
-    """
-    Used to transform target variable and prediction
-    """
+def transformer(y, func=None):
+    """Transforms target variable and prediction"""
     if func is None:
         return y
     else:
@@ -49,12 +51,12 @@ def transformer(y, func = None):
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-def stacking(models, X_train, y_train, X_test, regression = True, 
-    transform_target = None, transform_pred = None,
-    metric = None, n_folds = 4, stratified = False, 
-    shuffle = False, random_state = 0, verbose = 0):
+def stacking(models, X_train, y_train, X_test, regression=True,
+             transform_target=None, transform_pred=None,
+             metric=None, n_folds=4, stratified=False,
+             shuffle=False, random_state=0, verbose=0):
     """Function 'stacking' takes train data, test data and list of 1-st level
-    models, and return stacking features, which can be used with 2-nd level model.
+    models, and returns stacking features, which can be used with 2-nd level model.
     
     Complete examples and stacking concept - see below.
     
@@ -62,7 +64,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     ----------
     models : list 
         List of 1-st level models. You can use any models that follow sklearn
-        convention i.e. have methods 'fit' and 'predict'.
+        convention i.e. accept numpy arrays and have methods 'fit' and 'predict'.
         
     X_train : numpy array or sparse matrix of shape [n_train_samples, n_features]
         Training data
@@ -81,12 +83,13 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         Function to transform target variable.
         If None - transformation is not used.
         For example, for regression task (if target variable is skewed)
-            you can use transformation like numpy.log
+            you can use transformation like numpy.log.
+            Set transform_target = numpy.log
         Usually you want to use respective backward transformation 
-            for prediction like numpy.exp. To do so set 
-            transform_pred = numpy.exp
+            for prediction like numpy.exp.
+            Set transform_pred = numpy.exp
         Caution! Some transformations may give inapplicable results. 
-            For example, if target variable contains zeros numpy.log 
+            For example, if target variable contains zeros, numpy.log 
             gives you -inf. In such case you can use appropriate 
             transformation like numpy.log1p and respective
             backward transformation like numpy.expm1
@@ -94,20 +97,23 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     transform_pred : callable, default None
         Function to transform prediction.
         If None - transformation is not used.
-        If you use transformation for target variable 
-        like numpy.log, then using transform_pred you can specify 
-        respective backward transformation, like numpy.exp
+        If you use transformation for target variable (transform_target)
+            like numpy.log, then using transform_pred you can specify 
+            respective backward transformation like numpy.exp.
+        Look at description of parameter transform_target
         
     metric : callable, default None
         Evaluation metric (score function) which is used to calculate 
         results of cross-validation.
         If None, then by default:
-            for regression - mean_absolute_error,
-            for classification - accuracy_score
-        You can use any sklearn metric or define your own metric like shown below:
+            sklearn.metrics.mean_absolute_error - for regression
+            sklearn.metrics.accuracy_score - for classification
+        You can use any appropriate sklearn metric or 
+            define your own metric like shown below:
         
-        def root_mean_square_error(y_true, y_pred):
-            return numpy.sqrt(numpy.mean(numpy.power(y_true - y_pred, 2)))
+        def your_metric(y_true, y_pred):
+            # calculate
+            return result
         
     n_folds : int, default 4
         Number of folds in cross-validation
@@ -123,9 +129,9 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         
     verbose : int, default 0
         Level of verbosity.
-        0 - show no messages,
-        1 - show single score for each 1-st level model,
-        2 - show score for each fold of each 1-st level model
+        0 - show no messages
+        1 - for each model show single mean score
+        2 - for each model show score for each fold and mean score
         
         Caution. To calculate MEAN score across all folds 
         full train set prediction and full true target are used.
@@ -140,16 +146,19 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     S_test : numpy array of shape [n_test_samples, n_models]
         Stacking features for test set
     
-    Usage
-    -----
-    # For regression
-    S_train, S_test = stacking(models, X_train, y_train, X_test, verbose = 2)
-    
-    # For classification
+    Brief example (complete examples - see below)
+    ---------------------------------------------
+    from vecstack import stacking
+
+    # Get your data
+
+    # Initialize 1-st level models
+
+    # Get your stacking features in a single line
     S_train, S_test = stacking(models, X_train, y_train, X_test, 
-        regression = False, verbose = 2)
-        
-    Complete examples - see below. 
+        regression = True, verbose = 2)
+
+    # Use 2-nd level model with stacking features
     
     Stacking concept
     ----------------
@@ -165,8 +174,8 @@ def stacking(models, X_train, y_train, X_test, regression = True,
     You can find further stacking explanation with pictures at
     https://github.com/vecxoz/vecstack
     
-    Examples
-    --------
+    Complete examples
+    -----------------
     
     Regression
     ----------
@@ -292,8 +301,8 @@ def stacking(models, X_train, y_train, X_test, regression = True,
         kf = KFold(len(y_train), n_folds, shuffle = shuffle, random_state = random_state)
 
     # Create empty numpy arrays for stacking features
-    S_train = np.zeros((len(X_train), len(models)))
-    S_test = np.zeros((len(X_test), len(models)))
+    S_train = np.zeros((X_train.shape[0], len(models)))
+    S_test = np.zeros((X_test.shape[0], len(models)))
     
     # Loop across models
     for model_counter, model in enumerate(models):
@@ -301,7 +310,7 @@ def stacking(models, X_train, y_train, X_test, regression = True,
             print('model %d: [%s]' % (model_counter, model.__class__.__name__))
             
         # Create empty numpy array, which will contain temporary predictions for test set made in each fold
-        S_test_temp = np.zeros((len(X_test), len(kf)))
+        S_test_temp = np.zeros((X_test.shape[0], len(kf)))
         
         # Loop across folds
         for fold_counter, (tr_index, te_index) in enumerate(kf):
