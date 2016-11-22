@@ -18,7 +18,14 @@ Below you can find
 You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L61) or just type ```>>>help(stacking)```
 
 # Installation
-installation
+
+## First way
+* From the command line run ```pip install vecstack```
+
+## Second way
+* Download package file from [PyPI](https://pypi.python.org/pypi/vecstack)  
+* From the command line go to the directory where you've downloaded package file
+* Run ```python -m pip install vecstack-0.1.zip```
 
 # Brief example
 ```python
