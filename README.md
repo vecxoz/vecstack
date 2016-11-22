@@ -3,7 +3,7 @@ Python package for stacking (machine learning technique)
 * Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#brief-example)
 * Use any sklearn-like models
 * Perform classification and regression tasks
-* Use any user defined transformations for target and prediction
+* Apply any user-defined transformations for target and prediction
 * Python 2, Python 3
 * Win, Linux, Mac
 * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
