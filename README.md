@@ -19,11 +19,17 @@ You can also look at detailed [parameter description](https://github.com/vecxoz/
 
 # Installation
 
-### First way
+**1-st way**
 * From the command line run ```pip install vecstack```
 
-### Second way
-* Download package file from [PyPI](https://pypi.python.org/pypi/vecstack)  
+**2-nd way**
+* Download package file from [PyPI](https://pypi.python.org/pypi/vecstack)
+* Unpack archive
+* From the command line go to unpacked directory
+* Run ```python setup.py install```
+
+**3-rd way**
+* Download package file from [PyPI](https://pypi.python.org/pypi/vecstack)
 * From the command line go to the directory where you've downloaded package file
 * Run ```python -m pip install vecstack-0.1.zip```
 
