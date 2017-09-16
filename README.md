@@ -79,7 +79,7 @@ models = [
     RandomForestRegressor(random_state = 0, n_jobs = -1, 
         n_estimators = 100, max_depth = 3),
         
-    XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+    XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
         n_estimators = 100, max_depth = 3)]
     
 # Compute stacking features
@@ -171,7 +171,7 @@ S_train, S_test = stacking(models, X_train, y_train, X_test,
     stratified = True, shuffle = True, random_state = 0, verbose = 2)
 
 # Initialize 2-nd level model
-model = XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+model = XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
     n_estimators = 100, max_depth = 3)
     
 # Fit 2-nd level model
