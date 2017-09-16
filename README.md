@@ -53,7 +53,7 @@ S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True, 
 
 ```python
 from sklearn.datasets import load_boston
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.ensemble import RandomForestRegressor
@@ -88,7 +88,7 @@ S_train, S_test = stacking(models, X_train, y_train, X_test,
     shuffle = True, random_state = 0, verbose = 2)
 
 # Initialize 2-nd level model
-model = XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+model = XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
     n_estimators = 100, max_depth = 3)
     
 # Fit 2-nd level model
@@ -136,7 +136,7 @@ Final prediction score: [2.78409065]
 
 ```python
 from sklearn.datasets import load_iris
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -162,7 +162,7 @@ models = [
     RandomForestClassifier(random_state = 0, n_jobs = -1, 
         n_estimators = 100, max_depth = 3),
         
-    XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+    XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
         n_estimators = 100, max_depth = 3)]
     
 # Compute stacking features
