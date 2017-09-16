@@ -33,8 +33,8 @@ SOFTWARE.
 
 import numpy as np
 import scipy.stats as st
-from sklearn.cross_validation import KFold
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 
@@ -180,7 +180,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
     Regression
     ----------
     from sklearn.datasets import load_boston
-    from sklearn.cross_validation import train_test_split
+    from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_absolute_error
     from sklearn.ensemble import ExtraTreesRegressor
     from sklearn.ensemble import RandomForestRegressor
@@ -206,7 +206,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
         RandomForestRegressor(random_state = 0, n_jobs = -1, 
             n_estimators = 100, max_depth = 3),
         
-        XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+        XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
             n_estimators = 100, max_depth = 3)]
     
     # Compute stacking features
@@ -215,7 +215,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
         shuffle = True, random_state = 0, verbose = 2)
 
     # Initialize 2-nd level model
-    model = XGBRegressor(seed = 0, nthread = -1, learning_rate = 0.1, 
+    model = XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
         n_estimators = 100, max_depth = 3)
     
     # Fit 2-nd level model
@@ -231,7 +231,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
     Classification
     --------------
     from sklearn.datasets import load_iris
-    from sklearn.cross_validation import train_test_split
+    from sklearn.model_selection import train_test_split
     from sklearn.metrics import accuracy_score
     from sklearn.ensemble import ExtraTreesClassifier
     from sklearn.ensemble import RandomForestClassifier
@@ -257,7 +257,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
         RandomForestClassifier(random_state = 0, n_jobs = -1, 
             n_estimators = 100, max_depth = 3),
         
-        XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+        XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
             n_estimators = 100, max_depth = 3)]
     
     # Compute stacking features
@@ -266,7 +266,7 @@ def stacking(models, X_train, y_train, X_test, regression=True,
         stratified = True, shuffle = True, random_state = 0, verbose = 2)
 
     # Initialize 2-nd level model
-    model = XGBClassifier(seed = 0, nthread = -1, learning_rate = 0.1, 
+    model = XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
         n_estimators = 100, max_depth = 3)
     
     # Fit 2-nd level model
@@ -296,9 +296,9 @@ def stacking(models, X_train, y_train, X_test, regression=True,
         
     # Split indices to get folds (stratified can be used only for classification)
     if stratified and not regression:
-        kf = StratifiedKFold(y_train, n_folds, shuffle = shuffle, random_state = random_state)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
     else:
-        kf = KFold(len(y_train), n_folds, shuffle = shuffle, random_state = random_state)
+        kf = KFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
 
     # Create empty numpy arrays for stacking features
     S_train = np.zeros((X_train.shape[0], len(models)))
@@ -310,10 +310,10 @@ def stacking(models, X_train, y_train, X_test, regression=True,
             print('model %d: [%s]' % (model_counter, model.__class__.__name__))
             
         # Create empty numpy array, which will contain temporary predictions for test set made in each fold
-        S_test_temp = np.zeros((X_test.shape[0], len(kf)))
+        S_test_temp = np.zeros((X_test.shape[0], n_folds))
         
         # Loop across folds
-        for fold_counter, (tr_index, te_index) in enumerate(kf):
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
