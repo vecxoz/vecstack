@@ -6,7 +6,7 @@ Find out how to use:
 
 MIT License
 
-Copyright (c) 2016 vecxoz
+Copyright (c) 2016-2018 Igor Ivanov
 Email: vecxoz@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,3 +32,7 @@ SOFTWARE.
 #-------------------------------------------------------------------------------
 
 from .core import stacking
+
+__author__ = 'Igor Ivanov > kaggle.com/vecxoz'
+__license__ = 'MIT'
+__version__ = '0.2'
