@@ -1,13 +1,13 @@
 # vecstack
 Python package for stacking (machine learning technique)  
 Convenient way to automate OOF computation, prediction and bagging using any number of models  
-Note: `OOF` is also known as `out-of-fold predictions`, `OOF features`, `stacked features`, `stacking features`, etc.
+***Note:*** `OOF` is also known as `out-of-fold predictions`, `OOF features`, `stacked features`, `stacking features`, etc.
 * Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#brief-example)
 * Use any sklearn-like models
 * Perform classification and regression tasks
-* <sup>**NEW**</sup> Predict probabilities in classification task
-* <sup>**NEW**</sup> Modes: compute only what you need (only OOF, only predictions, both, etc.)
-* <sup>**NEW**</sup> Save resulting arrays and log with model parameters
+* <sup>**NEW**</sup> Predict [probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L202) in classification task
+* <sup>**NEW**</sup> [Modes](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L187): compute only what you need (only OOF, only predictions, both, etc.)
+* <sup>**NEW**</sup> [Save](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) resulting arrays and log with model parameters
 * Apply any user-defined transformations for target and prediction
 * Python 2, Python 3
 * Win, Linux, Mac
@@ -20,7 +20,7 @@ Below you can find
 * Complete examples for [regression](https://github.com/vecxoz/vecstack#regression) and [classification](https://github.com/vecxoz/vecstack#classification)
 * Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
 
-You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L61) or just type ```>>>help(stacking)```
+You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
 
 # Installation
 
@@ -42,6 +42,8 @@ You can also look at detailed [parameter description](https://github.com/vecxoz/
     * `pip install --upgrade --no-deps vecstack`
 * Upgrade directly from GitHub WITHOUT upgrading dependencies:
     * `pip install --upgrade --no-deps https://github.com/vecxoz/vecstack/archive/master.zip`
+* Uninstall
+    * `pip uninstall vecstack`
 
 # Brief example
 ```python
@@ -231,7 +233,7 @@ Final prediction score: [0.96666667]
 2. Any model can be used as 1-st level model or 2-nd level model.
 3. To avoid overfitting (for train set) we use cross-validation technique and in each fold we predict out-of-fold part of train set.
 4. The common practice is to use from 3 to 10 folds.
-5. In each fold we predict full test set, so after completion of all folds we need to find mean (mode) of all test set predictions made in each fold.
+5. In each fold we predict full test set, so after completion of all folds we need to find mean (mode) of all test set predictions made in each fold. Alternatively we can fit model on full train set and predict test set once, but predicting in each fold and computing mean (mode) may give more robust result.
 6. As an example we look at stacking implemented with single 1-st level model and 3-fold cross-validation.
 7. Tree pictures below describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2-nd level model.
 8. We can repeat this cycle using other 1-st level models to get more features for 2-nd level model.
