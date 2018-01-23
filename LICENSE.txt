@@ -1,7 +1,7 @@
 MIT License
 
 Vecstack. Python package for stacking (machine learning technique)
-Copyright (c) 2016 vecxoz
+Copyright (c) 2016-2018 Igor Ivanov
 Email: vecxoz@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
