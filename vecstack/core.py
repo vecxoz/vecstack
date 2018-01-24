@@ -125,7 +125,7 @@ def model_params(model):
 def stacking(models, X_train, y_train, X_test, 
              sample_weight=None, regression=True,
              transform_target=None, transform_pred=None,
-             mode='oof_pred', needs_proba=False, save_dir=None,
+             mode='oof_pred_bag', needs_proba=False, save_dir=None,
              metric=None, n_folds=4, stratified=False,
              shuffle=False, random_state=0, verbose=0):
     """Function 'stacking' takes train data, test data and list of 1-st level
@@ -184,7 +184,7 @@ def stacking(models, X_train, y_train, X_test,
             respective backward transformation like numpy.expm1.
         Look at description of parameter transform_target
         
-    mode: str, default 'oof_pred'
+    mode: str, default 'oof_pred_bag'
         Note: for detailes see terminology below
         'oof' - return only oof
         'oof_pred' - return oof and pred
@@ -614,6 +614,8 @@ def stacking(models, X_train, y_train, X_test,
                 
         # Fit model on full train set and predict test set
         if mode in ['pred', 'oof_pred']:
+            if verbose > 0:
+                print('    Fitting on full train set...\n')
             _ = model_action(model, X_train, y_train, None, sample_weight = sample_weight, action = 'fit', transform = transform_target)
             if 'predict_proba' == action:
                 col_slice_model = slice(model_counter * n_classes, model_counter * n_classes + n_classes)
