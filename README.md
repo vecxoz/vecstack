@@ -1,3 +1,6 @@
+[![PyPI version](https://img.shields.io/pypi/v/vecstack.svg?colorB=4cc61e)](https://pypi.python.org/pypi/vecstack)
+[![PyPI license](https://img.shields.io/pypi/l/vecstack.svg)](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
+
 # vecstack
 Python package for stacking (machine learning technique)  
 Convenient way to automate OOF computation, prediction and bagging using any number of models  
@@ -16,7 +19,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 
 # Get started
 * [Installation guide](https://github.com/vecxoz/vecstack#installation)
-* [Usage](https://github.com/vecxoz/vecstack#Usage)
+* [Usage](https://github.com/vecxoz/vecstack#usage)
 * Examples:
     * [regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
     * [classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
@@ -29,7 +32,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 
 * ***Classic 1st time installation (recommended):*** 
     * `pip install vecstack`
-* Install for current user only:
+* Install for current user only (if you have some troubles with write permission):
     * `pip install --user vecstack`
 * If your PATH doesn't work: 
     * `/usr/bin/python -m pip install vecstack`
