@@ -2,33 +2,35 @@
 Python package for stacking (machine learning technique)  
 Convenient way to automate OOF computation, prediction and bagging using any number of models  
 ***Note:*** `OOF` is also known as `out-of-fold predictions`, `OOF features`, `stacked features`, `stacking features`, etc.
-* Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#brief-example)
+* Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#usage)
 * Use any sklearn-like models
-* Perform classification and regression tasks
+* Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L160) tasks
 * <sup>**NEW**</sup> Predict [probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L202) in classification task
 * <sup>**NEW**</sup> [Modes](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L187): compute only what you need (only OOF, only predictions, both, etc.)
 * <sup>**NEW**</sup> [Save](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) resulting arrays and log with model parameters
-* Apply any user-defined transformations for target and prediction
+* Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L164) for target and prediction
 * Python 2, Python 3
 * Win, Linux, Mac
 * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
 * Depends on **numpy**, **scipy**, **scikit-learn>=18.0**
 
-Below you can find
-* [Installation](https://github.com/vecxoz/vecstack#installation) guide
-* [Brief example](https://github.com/vecxoz/vecstack#brief-example)
-* Complete examples for [regression](https://github.com/vecxoz/vecstack#regression) and [classification](https://github.com/vecxoz/vecstack#classification)
+# Get started
+* [Installation guide](https://github.com/vecxoz/vecstack#installation)
+* [Usage](https://github.com/vecxoz/vecstack#Usage)
+* Examples:
+    * [regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
+    * [classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
 * Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
-
-You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
+* You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
 
 # Installation
 
-***Note 1:*** On Linux don't forget to use `pip/pip3` (or `python/python3`) to install package for desired version  
-***Note 2:*** You can download package archive from [PyPI](https://pypi.python.org/pypi/vecstack) or [GitHub](https://github.com/vecxoz/vecstack/archive/master.zip)
+***Note:*** On Linux don't forget to use `pip/pip3` (or `python/python3`) to install package for desired version  
 
-* Classic 1st time installation: 
+* ***Classic 1st time installation (recommended):*** 
     * `pip install vecstack`
+* Install for current user only:
+    * `pip install --user vecstack`
 * If your PATH doesn't work: 
     * `/usr/bin/python -m pip install vecstack`
     * `C:/Python36/python -m pip install vecstack`
@@ -45,18 +47,18 @@ You can also look at detailed [parameter description](https://github.com/vecxoz/
 * Uninstall
     * `pip uninstall vecstack`
 
-# Brief example
+# Usage
 ```python
 from vecstack import stacking
 
 # Get your data
 
-# Initialize 1-st level models
+# Initialize 1st level models
 
 # Get your stacking features in a single line
 S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True, verbose = 2)
 
-# Use 2-nd level model with stacking features
+# Use 2nd level model with stacking features
 ```
 
 # Complete examples
@@ -83,7 +85,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
 
 # Caution! All models and parameter values are just 
 # demonstrational and shouldn't be considered as recommended.
-# Initialize 1-st level models.
+# Initialize 1st level models.
 models = [
     ExtraTreesRegressor(random_state = 0, n_jobs = -1, 
         n_estimators = 100, max_depth = 3),
@@ -99,11 +101,11 @@ S_train, S_test = stacking(models, X_train, y_train, X_test,
     regression = True, metric = mean_absolute_error, n_folds = 4, 
     shuffle = True, random_state = 0, verbose = 2)
 
-# Initialize 2-nd level model
+# Initialize 2nd level model
 model = XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
     n_estimators = 100, max_depth = 3)
     
-# Fit 2-nd level model
+# Fit 2nd level model
 model = model.fit(S_train, y_train)
 
 # Predict
@@ -166,7 +168,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
 
 # Caution! All models and parameter values are just 
 # demonstrational and shouldn't be considered as recommended.
-# Initialize 1-st level models.
+# Initialize 1st level models.
 models = [
     ExtraTreesClassifier(random_state = 0, n_jobs = -1, 
         n_estimators = 100, max_depth = 3),
@@ -182,11 +184,11 @@ S_train, S_test = stacking(models, X_train, y_train, X_test,
     regression = False, metric = accuracy_score, n_folds = 4, 
     stratified = True, shuffle = True, random_state = 0, verbose = 2)
 
-# Initialize 2-nd level model
+# Initialize 2nd level model
 model = XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
     n_estimators = 100, max_depth = 3)
     
-# Fit 2-nd level model
+# Fit 2nd level model
 model = model.fit(S_train, y_train)
 
 # Predict
@@ -229,14 +231,14 @@ Final prediction score: [0.96666667]
 
 # Stacking concept
 
-1. We want to predict train and test sets with some 1-st level model(s), and then use this predictions as features for 2-nd level model.  
-2. Any model can be used as 1-st level model or 2-nd level model.
+1. We want to predict train and test sets with some 1st level model(s), and then use this predictions as features for 2nd level model.  
+2. Any model can be used as 1st level model or 2nd level model.
 3. To avoid overfitting (for train set) we use cross-validation technique and in each fold we predict out-of-fold part of train set.
 4. The common practice is to use from 3 to 10 folds.
 5. In each fold we predict full test set, so after completion of all folds we need to find mean (mode) of all test set predictions made in each fold. (Alternatively we can fit model on full train set and predict test set once. This approach takes more time because we need to perform one additional fitting, but may give higher test accuracy because we can use all train data for fitting.)
-6. As an example we look at stacking implemented with single 1-st level model and 3-fold cross-validation.
-7. Three pictures below describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2-nd level model.
-8. We can repeat this cycle using other 1-st level models to get more features for 2-nd level model.
+6. As an example we look at stacking implemented with single 1st level model and 3-fold cross-validation.
+7. Three pictures below describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2nd level model.
+8. We can repeat this cycle using other 1st level models to get more features for 2nd level model.
 9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack/blob/master/README.md#animation).
 
 ***
