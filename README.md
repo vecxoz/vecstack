@@ -10,7 +10,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 * Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L160) tasks
 * <sup>**NEW**</sup> Predict [probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L202) in classification task
 * <sup>**NEW**</sup> [Modes](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L187): compute only what you need (only OOF, only predictions, both, etc.)
-* <sup>**NEW**</sup> [Save](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) resulting arrays and log with model parameters
+* <sup>**NEW**</sup> [Save](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) resulting arrays and log with model parameters ([log example](https://github.com/vecxoz/vecstack/blob/master/examples/03_log_example.txt))
 * Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L164) for target and prediction
 * Python 2, Python 3
 * Win, Linux, Mac
@@ -21,8 +21,9 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 * [Installation guide](https://github.com/vecxoz/vecstack#installation)
 * [Usage](https://github.com/vecxoz/vecstack#usage)
 * Examples:
-    * [regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
-    * [classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
+    * [Regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
+    * [Classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
+    * <sup>**MUST SEE**</sup> [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
 * Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
 * You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
 
@@ -242,7 +243,7 @@ Final prediction score: [0.96666667]
 6. As an example we look at stacking implemented with single 1st level model and 3-fold cross-validation.
 7. Three pictures below describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2nd level model.
 8. We can repeat this cycle using other 1st level models to get more features for 2nd level model.
-9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack/blob/master/README.md#animation).
+9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack#animation).
 
 ***
 ![stack1](https://github.com/vecxoz/vecstack/raw/master/pic/dia1.png "Fold 1 of 3")
