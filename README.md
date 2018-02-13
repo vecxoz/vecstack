@@ -20,11 +20,11 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 # Get started
 * [Installation guide](https://github.com/vecxoz/vecstack#installation)
 * [Usage](https://github.com/vecxoz/vecstack#usage)
+* <sup>**MUST SEE**</sup> [Stacking concept + Pictures + Code](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb)
 * Examples:
     * [Regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
     * [Classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
     * <sup>**MUST SEE**</sup> [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
-* Explanation of [**stacking concept**](https://github.com/vecxoz/vecstack#stacking-concept) with pictures
 * You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
 
 # Installation
@@ -235,23 +235,42 @@ Final prediction score: [0.96666667]
 
 # Stacking concept
 
-1. We want to predict train and test sets with some 1st level model(s), and then use this predictions as features for 2nd level model.  
+1. We want to predict train set and test set with some 1st level model(s), and then use these predictions as features for 2nd level model(s).  
 2. Any model can be used as 1st level model or 2nd level model.
-3. To avoid overfitting (for train set) we use cross-validation technique and in each fold we predict out-of-fold part of train set.
+3. To avoid overfitting (for train set) we use cross-validation technique and in each fold we predict out-of-fold (OOF) part of train set.
 4. The common practice is to use from 3 to 10 folds.
-5. In each fold we predict full test set, so after completion of all folds we need to find mean (mode) of all test set predictions made in each fold. (Alternatively we can fit model on full train set and predict test set once. This approach takes more time because we need to perform one additional fitting, but may give higher test accuracy because we can use all train data for fitting.)
+5. Predict test set:
+   * **Variant A:** In each fold we predict test set, so after completion of all folds we need to find mean (mode) of all temporary test set predictions made in each fold. 
+   * **Variant B:** We do not predict test set during cross-validation cycle. After completion of all folds we perform additional step: fit model on full train set and predict test set once. This approach takes more time because we need to perform one additional fitting.
 6. As an example we look at stacking implemented with single 1st level model and 3-fold cross-validation.
-7. Three pictures below describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2nd level model.
+7. Pictures:
+   * **Variant A:** Three pictures describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2nd level model. 
+   * **Variant B:** First three pictures describe three folds of cross-validation (like in Variant A) to get single train feature and fourth picture describes additional step to get single test feature.
 8. We can repeat this cycle using other 1st level models to get more features for 2nd level model.
-9. At the bottom you can see [GIF animation](https://github.com/vecxoz/vecstack#animation).
+9. You can also look at animation of [Variant A](https://github.com/vecxoz/vecstack#variant-a.-animation) and [Variant B](https://github.com/vecxoz/vecstack#variant-b.-animation).
 
-***
-![stack1](https://github.com/vecxoz/vecstack/raw/master/pic/dia1.png "Fold 1 of 3")
-***
-![stack2](https://github.com/vecxoz/vecstack/raw/master/pic/dia2.png "Fold 2 of 3")
-***
-![stack3](https://github.com/vecxoz/vecstack/raw/master/pic/dia3.png "Fold 3 of 3")
-***
+# Variant A
 
-# Animation
-![animation](https://github.com/vecxoz/vecstack/raw/master/pic/dia.gif "Animation")
+![Fold 1 of 3](https://github.com/vecxoz/vecstack/raw/master/pic/dia1.png "Fold 1 of 3")
+***
+![Fold 2 of 3](https://github.com/vecxoz/vecstack/raw/master/pic/dia2.png "Fold 2 of 3")
+***
+![Fold 3 of 3](https://github.com/vecxoz/vecstack/raw/master/pic/dia3.png "Fold 3 of 3")
+
+# Variant A. Animation
+
+![Variant A. Animation](https://github.com/vecxoz/vecstack/raw/master/pic/animation1.gif "Variant A. Animation")
+
+# Variant B
+
+![Step 1 of 4](https://github.com/vecxoz/vecstack/raw/master/pic/dia4.png "Step 1 of 4")
+***
+![Step 2 of 4](https://github.com/vecxoz/vecstack/raw/master/pic/dia5.png "Step 2 of 4")
+***
+![Step 3 of 4](https://github.com/vecxoz/vecstack/raw/master/pic/dia6.png "Step 3 of 4")
+***
+![Step 4 of 4](https://github.com/vecxoz/vecstack/raw/master/pic/dia7.png "Step 4 of 4")
+
+# Variant B. Animation
+
+![Variant B. Animation](https://github.com/vecxoz/vecstack/raw/master/pic/animation2.gif "Variant B. Animation")
