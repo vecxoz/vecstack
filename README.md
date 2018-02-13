@@ -247,7 +247,7 @@ Final prediction score: [0.96666667]
    * **Variant A:** Three pictures describe three folds of cross-validation. After completion of all three folds we get single train feature and single test feature to use with 2nd level model. 
    * **Variant B:** First three pictures describe three folds of cross-validation (like in Variant A) to get single train feature and fourth picture describes additional step to get single test feature.
 8. We can repeat this cycle using other 1st level models to get more features for 2nd level model.
-9. You can also look at animation of [Variant A](https://github.com/vecxoz/vecstack#variant-a.-animation) and [Variant B](https://github.com/vecxoz/vecstack#variant-b.-animation).
+9. You can also look at animation of [Variant A](https://github.com/vecxoz/vecstack#variant-a-animation) and [Variant B](https://github.com/vecxoz/vecstack#variant-b-animation).
 
 # Variant A
 
