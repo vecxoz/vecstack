@@ -38,10 +38,6 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 * If your PATH doesn't work: 
     * `/usr/bin/python -m pip install vecstack`
     * `C:/Python36/python -m pip install vecstack`
-* If you got package archive:
-    * `pip install vecstack.zip`
-* Without PIP (if you're inside unpacked archive):
-    * `python setup.py install`
 * Upgrade vecstack and all dependencies:
     * `pip install --upgrade vecstack`
 * Upgrade vecstack WITHOUT upgrading dependencies:
