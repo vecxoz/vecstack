@@ -49,6 +49,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import log_loss
+from sklearn.utils.validation import check_X_y, check_array
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -404,11 +405,20 @@ def stacking(models, X_train, y_train, X_test,
     # If empty <models> list
     if 0 == len(models):
         raise ValueError('List of models is empty')
-    # Convert arrays to ndarrays
+    # Check arrays
     # y_train and sample_weight must be 1d ndarrays (i.e. row, not column)
-    X_train = np.array(X_train)
-    y_train = np.array(y_train).ravel()
-    X_test = np.array(X_test)
+    X_train, y_train = check_X_y(X_train,
+                                 y_train,
+                                 accept_sparse=True, # allow all types of sparse
+                                 force_all_finite=False, # allow nan and inf because 
+                                                         # some models (xgboost) can handle
+                                 multi_output=False) # do not allow several columns in y_train
+                                 
+    if X_test is not None: # allow X_test to be None for mode='oof'
+        X_test = check_array(X_test,
+                             accept_sparse=True, # allow all types of sparse
+                             force_all_finite=False) # allow nan and inf because 
+                                                     # some models (xgboost) can handle
     if sample_weight is not None:
         sample_weight = np.array(sample_weight).ravel()
     # <regression>
