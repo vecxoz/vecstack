@@ -20,11 +20,12 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 # Get started
 * [Installation guide](https://github.com/vecxoz/vecstack#installation)
 * [Usage](https://github.com/vecxoz/vecstack#usage)
-* <sup>**MUST SEE**</sup> [Stacking concept + Pictures + Code](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb)
+* Tutorials:
+    * [Stacking concept + Pictures + Stacking implementation from scratch](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb)
 * Examples:
     * [Regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
     * [Classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
-    * <sup>**MUST SEE**</sup> [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
+    * [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
 * You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
 
 # Installation
