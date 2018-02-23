@@ -32,6 +32,7 @@ from vecstack import stacking
 from vecstack.core import model_action
 
 n_folds = 5
+temp_dir = 'tmpdw35lg54ms80eb42'
 
 boston = load_boston()
 X, y = boston.data, boston.target
@@ -56,13 +57,30 @@ class MinimalEstimator:
 
 class TestRegression(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        try:
+            os.mkdir(temp_dir)
+        except:
+            print('Unable to create temp dir')
+            
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            os.rmdir(temp_dir)
+        except:
+            print('Unable to remove temp dir')
+    
     def tearDown(self):
         # Remove files after each test
-        files = glob.glob('*.npy')
-        files.extend(glob.glob('*.txt'))
-        for file in files:
-            os.remove(file)
-            
+        files = glob.glob(os.path.join(temp_dir, '*.npy'))
+        files.extend(glob.glob(os.path.join(temp_dir, '*.log.txt')))
+        try:
+            for file in files:
+                os.remove(file)
+        except:
+            print('Unable to remove temp file')
+    
     #---------------------------------------------------------------------------
     # Testing returned and saved arrays in each mode
     #---------------------------------------------------------------------------
@@ -77,13 +95,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -103,13 +121,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -129,13 +147,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -167,13 +185,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -203,13 +221,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -236,14 +254,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             sample_weight = sw)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -271,14 +289,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             sample_weight = sw)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -303,14 +321,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             transform_target = np.log1p, transform_pred = np.expm1)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -335,17 +353,17 @@ class TestRegression(unittest.TestCase):
         
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0)
 
         models = [LinearRegression()]
         S_train_3, S_test_3 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 1)
             
         models = [LinearRegression()]
         S_train_4, S_test_4 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 2)
             
         models = [LinearRegression()]
@@ -399,13 +417,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, save_dir = '.', 
+            regression = True, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0)
             
         # Load mean score and std from file
         # Normally if cleaning is performed there is only one .log.txt file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.log.txt'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.log.txt')))[-1] # take the latest file
         with open(file_name) as f:
             for line in f:
                 if 'MEAN' in line:
@@ -442,13 +460,13 @@ class TestRegression(unittest.TestCase):
         models = [LinearRegression(),
                   Ridge(random_state = 0)]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -504,13 +522,13 @@ class TestRegression(unittest.TestCase):
         models = [LinearRegression(),
                   Ridge(random_state = 0)]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -535,13 +553,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, csr_matrix(X_test), 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -562,13 +580,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, csc_matrix(X_train), y_train, csc_matrix(X_test),
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -589,13 +607,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, coo_matrix(X_train), y_train, coo_matrix(X_test),
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -620,13 +638,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, coo_matrix(X_test),
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -651,13 +669,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, X_test,
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -680,13 +698,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, None, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -751,13 +769,13 @@ class TestRegression(unittest.TestCase):
 
         models = [MinimalEstimator()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
