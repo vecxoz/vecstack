@@ -41,7 +41,6 @@ import os
 import sys
 import warnings
 from datetime import datetime
-import re
 import numpy as np
 import scipy.stats as st
 from sklearn.model_selection import KFold
@@ -206,7 +205,7 @@ def stacking(models, X_train, y_train, X_test,
         Ignored if regression=True
         
     save_dir: str, default None
-        If specified - considered as a valid directory where log and 
+        If specified - considered as a valid directory (must exist) where log and 
         returned arrays will be saved. 
         If not specified - log and arrays will not be saved.
         Path may be absolute or relative to the directory from where script was run.
@@ -409,14 +408,14 @@ def stacking(models, X_train, y_train, X_test,
     # y_train and sample_weight must be 1d ndarrays (i.e. row, not column)
     X_train, y_train = check_X_y(X_train,
                                  y_train,
-                                 accept_sparse=True, # allow all types of sparse
+                                 accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
                                  force_all_finite=False, # allow nan and inf because 
                                                          # some models (xgboost) can handle
                                  multi_output=False) # do not allow several columns in y_train
                                  
     if X_test is not None: # allow X_test to be None for mode='oof'
         X_test = check_array(X_test,
-                             accept_sparse=True, # allow all types of sparse
+                             accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
                              force_all_finite=False) # allow nan and inf because 
                                                      # some models (xgboost) can handle
     if sample_weight is not None:

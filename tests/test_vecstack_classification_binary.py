@@ -33,6 +33,7 @@ from vecstack import stacking
 
 n_classes = 2
 n_folds = 5
+temp_dir = 'tmpdw35lg54ms80eb42'
 
 X, y = make_classification(n_samples = 500, n_features = 5, n_informative = 3, n_redundant = 1, 
                            n_classes = n_classes, flip_y = 0, random_state = 0)
@@ -43,12 +44,29 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, rando
 
 class TestClassificationMulticlass(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        try:
+            os.mkdir(temp_dir)
+        except:
+            print('Unable to create temp dir')
+            
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            os.rmdir(temp_dir)
+        except:
+            print('Unable to remove temp dir')
+
     def tearDown(self):
         # Remove files after each test
-        files = glob.glob('*.npy')
-        files.extend(glob.glob('*.txt'))
-        for file in files:
-            os.remove(file)
+        files = glob.glob(os.path.join(temp_dir, '*.npy'))
+        files.extend(glob.glob(os.path.join(temp_dir, '*.log.txt')))
+        try:
+            for file in files:
+                os.remove(file)
+        except:
+            print('Unable to remove temp file')
             
     #---------------------------------------------------------------------------
     # Test returned and saved arrays in each mode (parameter <mode>)
@@ -69,13 +87,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -95,13 +113,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -121,13 +139,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'pred', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -160,13 +178,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -197,13 +215,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -229,12 +247,12 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
-            mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir = '.')
+            mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -255,12 +273,12 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
-            mode = 'oof', random_state = 0, verbose = 0, needs_proba = True, save_dir = '.')
+            mode = 'oof', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -281,12 +299,12 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
-            mode = 'pred', random_state = 0, verbose = 0, needs_proba = True, save_dir = '.')
+            mode = 'pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -322,13 +340,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -371,13 +389,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -415,13 +433,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = True, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = True, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -450,13 +468,13 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, save_dir = '.', 
+            regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
             
         # Load mean score and std from file
         # Normally if cleaning is performed there is only one .log.txt file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.log.txt'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.log.txt')))[-1] # take the latest file
         with open(file_name) as f:
             for line in f:
                 if 'MEAN' in line:
@@ -487,14 +505,14 @@ class TestClassificationMulticlass(unittest.TestCase):
 
         models = [LogisticRegression()]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, save_dir = '.', 
+            regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True, 
             needs_proba = True)
             
         # Load mean score and std from file
         # Normally if cleaning is performed there is only one .log.txt file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.log.txt'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.log.txt')))[-1] # take the latest file
         with open(file_name) as f:
             for line in f:
                 if 'MEAN' in line:
@@ -533,13 +551,13 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression(),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -596,13 +614,13 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression(),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -637,12 +655,12 @@ class TestClassificationMulticlass(unittest.TestCase):
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
-            mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir = '.')
+            mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -708,13 +726,13 @@ class TestClassificationMulticlass(unittest.TestCase):
         models = [LogisticRegression(),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = False, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]

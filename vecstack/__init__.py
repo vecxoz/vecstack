@@ -35,4 +35,4 @@ from .core import stacking
 
 __author__ = 'Igor Ivanov > kaggle.com/vecxoz'
 __license__ = 'MIT'
-__version__ = '0.2.1'
+__version__ = '0.2.2'

@@ -10,10 +10,15 @@ import unittest
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_allclose
 from numpy.testing import assert_equal
+from numpy.testing import assert_raises
+from numpy.testing import assert_warns
 
 import os
 import glob
 import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse import csc_matrix
+from scipy.sparse import coo_matrix
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
@@ -22,10 +27,12 @@ from sklearn.datasets import load_boston
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import make_scorer
 from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import Ridge
 from vecstack import stacking
+from vecstack.core import model_action
 
 n_folds = 5
+temp_dir = 'tmpdw35lg54ms80eb42'
 
 boston = load_boston()
 X, y = boston.data, boston.target
@@ -34,15 +41,46 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, rando
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
+class MinimalEstimator:
+    """Has no get_params attribute"""
+    def __init__(self, random_state=0):
+        self.random_state = random_state
+    def fit(self, X, y):
+        return self
+    def predict(self, X):
+        return np.ones(X.shape[0])
+    def predict_proba(self, X):
+        return np.zeros(X.shape[0])
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
 class TestRegression(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        try:
+            os.mkdir(temp_dir)
+        except:
+            print('Unable to create temp dir')
+            
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            os.rmdir(temp_dir)
+        except:
+            print('Unable to remove temp dir')
+    
     def tearDown(self):
         # Remove files after each test
-        files = glob.glob('*.npy')
-        files.extend(glob.glob('*.txt'))
-        for file in files:
-            os.remove(file)
-            
+        files = glob.glob(os.path.join(temp_dir, '*.npy'))
+        files.extend(glob.glob(os.path.join(temp_dir, '*.log.txt')))
+        try:
+            for file in files:
+                os.remove(file)
+        except:
+            print('Unable to remove temp file')
+    
     #---------------------------------------------------------------------------
     # Testing returned and saved arrays in each mode
     #---------------------------------------------------------------------------
@@ -57,13 +95,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -83,13 +121,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -109,13 +147,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -147,13 +185,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -183,13 +221,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -216,14 +254,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             sample_weight = sw)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -251,14 +289,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             sample_weight = sw)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -283,14 +321,14 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0,
             transform_target = np.log1p, transform_pred = np.expm1)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -315,17 +353,17 @@ class TestRegression(unittest.TestCase):
         
         models = [LinearRegression()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0)
 
         models = [LinearRegression()]
         S_train_3, S_test_3 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 1)
             
         models = [LinearRegression()]
         S_train_4, S_test_4 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.', 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 2)
             
         models = [LinearRegression()]
@@ -379,13 +417,13 @@ class TestRegression(unittest.TestCase):
 
         models = [LinearRegression()]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, save_dir = '.', 
+            regression = True, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0)
             
         # Load mean score and std from file
         # Normally if cleaning is performed there is only one .log.txt file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.log.txt'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.log.txt')))[-1] # take the latest file
         with open(file_name) as f:
             for line in f:
                 if 'MEAN' in line:
@@ -410,7 +448,7 @@ class TestRegression(unittest.TestCase):
         _ = model.fit(X_train, y_train)
         S_test_1_a = model.predict(X_test).reshape(-1, 1)
         
-        model = SGDRegressor(random_state = 0)
+        model = Ridge(random_state = 0)
         S_train_1_b = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         _ = model.fit(X_train, y_train)
@@ -420,15 +458,15 @@ class TestRegression(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
         models = [LinearRegression(),
-                  SGDRegressor(random_state = 0)]
+                  Ridge(random_state = 0)]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -468,12 +506,12 @@ class TestRegression(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = SGDRegressor(random_state = 0)
+            model = Ridge(random_state = 0)
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1_b = np.mean(S_test_temp, axis = 1).reshape(-1, 1)
     
-        model = SGDRegressor(random_state = 0)
+        model = Ridge(random_state = 0)
         S_train_1_b = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
             
@@ -482,15 +520,15 @@ class TestRegression(unittest.TestCase):
         
 
         models = [LinearRegression(),
-                  SGDRegressor(random_state = 0)]
+                  Ridge(random_state = 0)]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
-            regression = True, n_folds = n_folds, shuffle = False, save_dir = '.',
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0)
             
         # Load OOF from file
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
-        file_name = sorted(glob.glob('*.npy'))[-1] # take the latest file
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
         S = np.load(file_name)
         S_train_3 = S[0]
         S_test_3 = S[1]
@@ -501,7 +539,271 @@ class TestRegression(unittest.TestCase):
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
         
+    #---------------------------------------------------------------------------
+    # Testing sparse types CSR, CSC, COO
+    #---------------------------------------------------------------------------
+
+    def test_oof_pred_mode_sparse_csr(self):
+    
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, csr_matrix(X_train), y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(csr_matrix(X_train), y_train)
+        S_test_1 = model.predict(csr_matrix(X_test)).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, csr_matrix(X_test), 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
         
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+        
+    def test_oof_pred_mode_sparse_csc(self):
+    
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, csc_matrix(X_train), y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(csc_matrix(X_train), y_train)
+        S_test_1 = model.predict(csc_matrix(X_test)).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, csc_matrix(X_train), y_train, csc_matrix(X_test),
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+        
+    def test_oof_pred_mode_sparse_coo(self):
+    
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, coo_matrix(X_train), y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(coo_matrix(X_train), y_train)
+        S_test_1 = model.predict(coo_matrix(X_test)).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, coo_matrix(X_train), y_train, coo_matrix(X_test),
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+        
+    #---------------------------------------------------------------------------
+    # Testing X_train -> SCR, X_test -> COO
+    #---------------------------------------------------------------------------
+    
+    def test_oof_pred_mode_sparse_csr_coo(self):
+    
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, csr_matrix(X_train), y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(csr_matrix(X_train), y_train)
+        S_test_1 = model.predict(coo_matrix(X_test)).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, coo_matrix(X_test),
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+        
+    #---------------------------------------------------------------------------
+    # Testing X_train -> SCR, X_test -> Dense
+    #---------------------------------------------------------------------------
+    
+    def test_oof_pred_mode_sparse_csr_dense(self):
+    
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, csr_matrix(X_train), y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(csr_matrix(X_train), y_train)
+        S_test_1 = model.predict(X_test).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, csr_matrix(X_train), y_train, X_test,
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+    
+    #---------------------------------------------------------------------------
+    # Testing X_test=None
+    #---------------------------------------------------------------------------
+    def test_oof_mode_xtest_is_none(self):
+
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        S_test_1 = None
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, None, 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
+            mode = 'oof', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+        
+    #---------------------------------------------------------------------------
+    # Testing parameter exceptions
+    #---------------------------------------------------------------------------
+    def test_exceptions(self):
+        # Empty model list
+        assert_raises(ValueError, stacking, [], X_train, y_train, X_test)
+        # Wrong mode
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, mode='abc')
+        # Path does not exist
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, save_dir='./As26bV85')
+        # n_folds is not int
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, n_folds='A')
+        # n_folds is less than 2
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, n_folds=1)
+        # Wrong verbose value
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, verbose=25)
+                      
+        # Internal function model_action
+        assert_raises(ValueError, model_action, LinearRegression(), 
+                      X_train, y_train, X_test, sample_weight=None, 
+                      action='abc', transform=None)
+                      
+    #---------------------------------------------------------------------------
+    # Testing parameter warnings
+    #---------------------------------------------------------------------------
+    def test_warnings(self):
+        # Parameters specific for classification are ignored if regression=True
+        assert_warns(UserWarning, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, regression=True, 
+                      needs_proba=True)
+                      
+        assert_warns(UserWarning, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, regression=True, 
+                      stratified=True)
+                      
+        assert_warns(UserWarning, stacking, [LinearRegression()], 
+                      X_train, y_train, X_test, regression=True, 
+                      needs_proba=True, stratified=True)
+                      
+    #---------------------------------------------------------------------------
+    # Test if model has no 'get_params'
+    #---------------------------------------------------------------------------
+    def test_oof_pred_mode_no_get_params(self):
+    
+        S_train_1 = np.ones(X_train.shape[0]).reshape(-1, 1)
+        S_test_1 = np.ones(X_test.shape[0]).reshape(-1, 1)
+
+        models = [MinimalEstimator()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred', random_state = 0, verbose = 0)
+            
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+        
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+    
+    #-------------------------------------------------------------------------------
+    # Test inconsistent data shape or type
+    #-------------------------------------------------------------------------------
+    def test_inconsistent_data(self):
+        # nan or inf in y
+        y_train_nan = y_train.copy()
+        y_train_nan[0] = np.nan
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train_nan, X_test)
+                      
+        # y has two or more columns
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, np.c_[y_train, y_train], X_test)
+                      
+        # X_train and y_train shape nismatch
+        assert_raises(ValueError, stacking, [LinearRegression()], 
+                      X_train, y_train[:10], X_test)
+    
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
