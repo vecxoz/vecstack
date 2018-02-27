@@ -1,5 +1,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/vecstack.svg?colorB=4cc61e)](https://pypi.python.org/pypi/vecstack)
 [![PyPI license](https://img.shields.io/pypi/l/vecstack.svg)](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
+[![Build Status](https://travis-ci.org/vecxoz/vecstack.svg?branch=master)](https://travis-ci.org/vecxoz/vecstack)
+[![Coverage Status](https://coveralls.io/repos/github/vecxoz/vecstack/badge.svg?branch=master)](https://coveralls.io/github/vecxoz/vecstack?branch=master)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/vecstack.svg)](https://pypi.python.org/pypi/vecstack/)
 
 # vecstack
 Python package for stacking (machine learning technique)  
