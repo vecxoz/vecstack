@@ -1,0 +1,35 @@
+# .travis.yml needs to be present on all active branches
+# check if .travis.yml is valid: http://lint.travis-ci.org/
+# to skip build for given commit put [ci skip] or [skip ci] in commit message
+
+language: python
+
+# versions supported by scikit-learn
+python:
+  - "3.6"
+  - "3.5"
+  - "3.4"
+  - "2.7"
+
+# safelist
+branches:
+  only:
+  - master
+  - dev
+
+install:
+  # - pip install -r requirements.txt
+  - pip install numpy
+  - pip install scipy
+  - pip install scikit-learn
+  - pip install nose
+  - pip install coverage
+  - pip install coveralls
+  - pip install .
+
+script:
+  - nosetests --with-coverage --cover-package=vecstack
+  # - nosetests --with-coverage --cover-package=vecstack --cover-branches
+
+after_success:
+  - coveralls
