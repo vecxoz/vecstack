@@ -65,7 +65,7 @@ def transformer(y, func=None):
 
 def model_action(model, X_train, y_train, X_test, 
                  sample_weight=None, action=None, 
-                 transform=None):
+                 transform=None, **fit_args):
     """Performs model action.
     This wrapper gives us ability to choose action dynamically 
     (e.g. predict or predict_proba).
@@ -78,9 +78,9 @@ def model_action(model, X_train, y_train, X_test,
         # We use following condition, because some models (e.g. Lars) may not have
         # 'sample_weight' parameter of fit method
         if sample_weight is not None:
-            return model.fit(X_train, transformer(y_train, func = transform), sample_weight=sample_weight)
+            return model.fit(X_train, transformer(y_train, func = transform), sample_weight=sample_weight, **fit_args)
         else:
-            return model.fit(X_train, transformer(y_train, func = transform))
+            return model.fit(X_train, transformer(y_train, func = transform), **fit_args)
     elif 'predict' == action:
         return transformer(model.predict(X_test), func = transform)
     elif 'predict_proba' == action:
@@ -127,7 +127,7 @@ def stacking(models, X_train, y_train, X_test,
              transform_target=None, transform_pred=None,
              mode='oof_pred_bag', needs_proba=False, save_dir=None,
              metric=None, n_folds=4, stratified=False,
-             shuffle=False, random_state=0, verbose=0):
+             shuffle=False, random_state=0, verbose=0, **fit_args):
     """Function 'stacking' takes train data, test data and list of 1-st level
     models, and returns stacking features, which can be used with 2-nd level model.
     
@@ -565,7 +565,7 @@ def stacking(models, X_train, y_train, X_test,
                 
                 # Fit 1-st level model
                 if mode in ['pred_bag', 'oof', 'oof_pred', 'oof_pred_bag']:
-                    _ = model_action(model, X_tr, y_tr, None, sample_weight = sample_weight_tr, action = 'fit', transform = transform_target)
+                    _ = model_action(model, X_tr, y_tr, None, sample_weight = sample_weight_tr, action = 'fit', transform = transform_target, **fit_args)
                     
                 # Predict out-of-fold part of train set
                 if mode in ['oof', 'oof_pred', 'oof_pred_bag']:
@@ -625,7 +625,7 @@ def stacking(models, X_train, y_train, X_test,
         if mode in ['pred', 'oof_pred']:
             if verbose > 0:
                 print('    Fitting on full train set...\n')
-            _ = model_action(model, X_train, y_train, None, sample_weight = sample_weight, action = 'fit', transform = transform_target)
+            _ = model_action(model, X_train, y_train, None, sample_weight = sample_weight, action = 'fit', transform = transform_target, **fit_args)
             if 'predict_proba' == action:
                 col_slice_model = slice(model_counter * n_classes, model_counter * n_classes + n_classes)
             else:
