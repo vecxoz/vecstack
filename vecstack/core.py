@@ -1,8 +1,8 @@
-"""Python package for stacking (machine learning technique)
+"""Functional API for stacking.
 
 Find out how to use:
->>>from vecstack import stacking
->>>help(stacking)
+>>> from vecstack import stacking
+>>> help(stacking)
 
 MIT License
 
@@ -48,7 +48,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import log_loss
-from sklearn.utils.validation import check_X_y, check_array
+from sklearn.utils.validation import check_X_y
+from sklearn.utils.validation import check_array
+from sklearn.base import clone
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -447,7 +449,7 @@ def stacking(models, X_train, y_train, X_test,
     # Additional check for inapplicable parameter combinations
     # If regression=True we ignore classification-specific parameters and issue user warning
     if regression and (needs_proba or stratified):
-        warn_str = 'Task is regression <regression=True> hence function ignored classification-specific parameters which were set as <True>:'
+        warn_str = 'This is regression task hence classification-specific parameters set to <True> were ignored:'
         if needs_proba:
             needs_proba = False
             warn_str += ' <needs_proba>'
@@ -470,13 +472,13 @@ def stacking(models, X_train, y_train, X_test,
     #---------------------------------------------------------------------------
     if save_dir is not None or verbose > 0:
         if regression:
-            task_str = 'task:       [regression]'
+            task_str = 'task:         [regression]'
         else:
-            task_str = 'task:       [classification]'
-            n_classes_str = 'n_classes:  [%d]' % len(np.unique(y_train))
-        metric_str = 'metric:     [%s]' % metric.__name__
-        mode_str = 'mode:       [%s]' % mode
-        n_models_str = 'n_models:   [%d]' % len(models)
+            task_str = 'task:         [classification]'
+            n_classes_str = 'n_classes:    [%d]' % len(np.unique(y_train))
+        metric_str = 'metric:       [%s]' % metric.__name__
+        mode_str = 'mode:         [%s]' % mode
+        n_models_str = 'n_models:     [%d]' % len(models)
     
     # Print report header
     if verbose > 0:
@@ -528,7 +530,7 @@ def stacking(models, X_train, y_train, X_test,
     #---------------------------------------------------------------------------
     for model_counter, model in enumerate(models):
         if save_dir is not None or verbose > 0:
-            model_str = 'model %d:    [%s]' % (model_counter, model.__class__.__name__)
+            model_str = 'model %2d:     [%s]' % (model_counter, model.__class__.__name__)
         if save_dir is not None:
             models_folds_str += '-' * 40 + '\n'
             models_folds_str += model_str + '\n'
@@ -558,10 +560,14 @@ def stacking(models, X_train, y_train, X_test,
                 # Split sample weights accordingly (if passed)
                 if sample_weight is not None:
                     sample_weight_tr = sample_weight[tr_index]
-                    sample_weight_te = sample_weight[te_index]
+                    # sample_weight_te = sample_weight[te_index]
                 else:
                     sample_weight_tr = None
-                    sample_weight_te = None
+                    # sample_weight_te = None
+
+                # Save RAM: clone to avoid fitting model directly inside users list
+                # Set safe=False to be able to clone non-sklearn models
+                model = clone(model, safe=False)
                 
                 # Fit 1-st level model
                 if mode in ['pred_bag', 'oof', 'oof_pred', 'oof_pred_bag']:
@@ -588,7 +594,7 @@ def stacking(models, X_train, y_train, X_test,
                     if save_dir is not None or verbose > 0:
                         score = metric(y_te, S_train[te_index, col_slice_model])
                         scores = np.append(scores, score)
-                        fold_str = '    fold %d: [%.8f]' % (fold_counter, score)
+                        fold_str = '    fold %2d:  [%.8f]' % (fold_counter, score)
                     if save_dir is not None:
                         models_folds_str += fold_str + '\n'
                     if verbose > 1:    
@@ -610,8 +616,8 @@ def stacking(models, X_train, y_train, X_test,
         if mode in ['oof', 'oof_pred', 'oof_pred_bag']:
             if save_dir is not None or verbose > 0:
                 sep_str = '    ----'
-                mean_str = '    MEAN:   [%.8f] + [%.8f]' % (np.mean(scores), np.std(scores))
-                full_str = '    FULL:   [%.8f]\n' % (metric(y_train, S_train[:, col_slice_model]))
+                mean_str = '    MEAN:     [%.8f] + [%.8f]' % (np.mean(scores), np.std(scores))
+                full_str = '    FULL:     [%.8f]\n' % (metric(y_train, S_train[:, col_slice_model]))
             if save_dir is not None:
                 models_folds_str += sep_str + '\n'
                 models_folds_str += mean_str + '\n'
