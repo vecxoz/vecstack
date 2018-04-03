@@ -31,4 +31,5 @@ script:
   - nosetests --with-coverage --cover-package=vecstack
 
 after_success:
+  - coverage report -m
   - coveralls
