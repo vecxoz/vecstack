@@ -18,9 +18,9 @@ branches:
   - dev
 
 install:
-  # - pip install -r requirements.txt
   - pip install numpy
   - pip install scipy
+  - pip install pandas
   - pip install scikit-learn
   - pip install nose
   - pip install coverage
@@ -29,7 +29,6 @@ install:
 
 script:
   - nosetests --with-coverage --cover-package=vecstack
-  # - nosetests --with-coverage --cover-package=vecstack --cover-branches
 
 after_success:
   - coveralls
