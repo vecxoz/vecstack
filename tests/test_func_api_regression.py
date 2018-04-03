@@ -48,6 +48,8 @@ class MinimalEstimator:
     """Has no get_params attribute"""
     def __init__(self, random_state=0):
         self.random_state = random_state
+    def __repr__(self):
+        return 'Demo string from __repr__'
     def fit(self, X, y):
         return self
     def predict(self, X):
