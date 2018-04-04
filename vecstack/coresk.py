@@ -163,6 +163,9 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         List of base estimators (not fitted) passed by user (or default)
     n_estimators_ : int
         Number of base estimators passed by user (or default)
+    n_classes_ : int
+        Number of classes in classification task.
+        ``None`` in regression task.
     models_A_ : list of lists
         List containing n_estimators lists. Each of which contains
         n_folds models (fitted estimators).
@@ -386,6 +389,8 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         self.n_features_ = X.shape[1]
         if not self.regression:
             self.n_classes_ = len(np.unique(y))
+        else:
+            self.n_classes_ = None
         self.n_estimators_ = len(self.estimators_)
         self.train_footprint_ = self._get_footprint(X)
 
