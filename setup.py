@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='vecstack',
-      version='0.2.2',
+      version='0.3.0',
       description='Python package for stacking (machine learning technique)',
       long_description='Convenient way to automate OOF computation, prediction and bagging using any number of models',
       classifiers=[

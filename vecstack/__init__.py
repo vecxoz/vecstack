@@ -1,8 +1,10 @@
 """Python package for stacking (machine learning technique)
 
 Find out how to use:
->>>from vecstack import stacking
->>>help(stacking)
+>>> from vecstack import stacking
+>>> help(stacking)
+>>> from vecstack import StackingTransformer
+>>> help(StackingTransformer)
 
 MIT License
 
@@ -28,11 +30,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from .core import stacking
+from .coresk import StackingTransformer
 
 __author__ = 'Igor Ivanov > kaggle.com/vecxoz'
 __license__ = 'MIT'
-__version__ = '0.2.2'
+__version__ = '0.3.0'
+
+__all__ = ['stacking', 'StackingTransformer']
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
