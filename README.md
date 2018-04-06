@@ -11,7 +11,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 * [Functional API](https://github.com/vecxoz/vecstack#usage-functional-api):
     * Minimalistic. Get your stacked features in a single line
     * RAM-friendly. The lowest possible memory consumption
-    * Kaggle-ready. Stacked features and hyperparameters from each run can be [automatically saved](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) in files. No more mess at the end of the competition.  [Log example](https://github.com/vecxoz/vecstack/blob/master/examples/03_log_example.txt)
+    * Kaggle-ready. Stacked features and hyperparameters from each run can be [automatically saved](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L209) in files. No more mess at the end of the competition.  [Log example](https://github.com/vecxoz/vecstack/blob/master/examples/03_log_example.txt)
 * [Scikit-learn API](https://github.com/vecxoz/vecstack#usage-scikit-learn-api):
     * Standardized. Fully scikit-learn compatible transformer class exposing `fit` and `transform` methods
     * Pipeline-certified. Implement and deploy [multilevel stacking](https://github.com/vecxoz/vecstack/blob/master/examples/04_sklearn_api_regression_pipeline.ipynb) like it's no big deal using `sklearn.pipeline.Pipeline` 
@@ -42,7 +42,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
     * Scikit-learn API:
         * [Regression + Multilevel stacking using Pipeline](https://github.com/vecxoz/vecstack/blob/master/examples/04_sklearn_api_regression_pipeline.ipynb)
 * Documentation:
-    * [Functional API](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or type ```>>> help(stacking)```
+    * [Functional API](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L133) or type ```>>> help(stacking)```
     * [Scikit-learn API](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L64) or type ```>>> help(StackingTransformer)```
 
 # Installation
