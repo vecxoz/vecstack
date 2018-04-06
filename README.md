@@ -5,31 +5,45 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/vecstack.svg)](https://pypi.python.org/pypi/vecstack/)
 
 # vecstack
-Python package for stacking (machine learning technique)  
+Python package for stacking featuring lightweight ***functional API*** and fully compatible ***scikit-learn API***  
 Convenient way to automate OOF computation, prediction and bagging using any number of models  
-***Note:*** `OOF` is also known as `out-of-fold predictions`, `OOF features`, `stacked features`, `stacking features`, etc.
-* Easy to use. Perform stacking in a [single line](https://github.com/vecxoz/vecstack#usage)
-* Use any sklearn-like models
-* Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L160) tasks
-* <sup>**NEW**</sup> Predict [probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L202) in classification task
-* <sup>**NEW**</sup> [Modes](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L187): compute only what you need (only OOF, only predictions, both, etc.)
-* <sup>**NEW**</sup> [Save](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) resulting arrays and log with model parameters ([log example](https://github.com/vecxoz/vecstack/blob/master/examples/03_log_example.txt))
-* Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L164) for target and prediction
-* Python 2, Python 3
-* Win, Linux, Mac
-* [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
-* Depends on **numpy**, **scipy**, **scikit-learn>=18.0**
+
+* [Functional API](https://github.com/vecxoz/vecstack#usage-functional-api):
+    * Minimalistic. Get your stacked features in a single line
+    * RAM-friendly. The lowest possible memory consumption
+    * Kaggle-ready. Stacked features and hyperparameters from each run can be [automatically saved](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L207) in files. No more mess at the end of the competition.  [Log example](https://github.com/vecxoz/vecstack/blob/master/examples/03_log_example.txt)
+* [Scikit-learn API](https://github.com/vecxoz/vecstack#usage-scikit-learn-api):
+    * Standardized. Fully scikit-learn compatible transformer class exposing `fit` and `transform` methods
+    * Pipeline-certified. Implement and deploy [multilevel stacking](https://github.com/vecxoz/vecstack/blob/master/examples/04_sklearn_api_regression_pipeline.ipynb) like it's no big deal using `sklearn.pipeline.Pipeline` 
+    * And of course `FeatureUnion` and `GridSearchCV` are also invited to the party
+* Overall specs:
+    * Use any sklearn-like estimators
+    * Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L83) tasks
+    * Predict [class labels or probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L119) in classification task
+    * Apply any [user-defined metric](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L124)
+    * Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L87) for target and prediction
+    * Python 2, Python 3
+    * Win, Linux, Mac
+    * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
+    * Depends on **numpy**, **scipy**, **scikit-learn>=18.0**
 
 # Get started
 * [Installation guide](https://github.com/vecxoz/vecstack#installation)
-* [Usage](https://github.com/vecxoz/vecstack#usage)
+* Usage:
+    * [Functional API](https://github.com/vecxoz/vecstack#usage-functional-api)
+    * [Scikit-learn API](https://github.com/vecxoz/vecstack#usage-scikit-learn-api)
 * Tutorials:
     * [Stacking concept + Pictures + Stacking implementation from scratch](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb)
 * Examples:
-    * [Regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
-    * [Classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
-    * [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
-* You can also look at detailed [parameter description](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or just type ```>>>help(stacking)```
+    * Functional API:
+        * [Regression](https://github.com/vecxoz/vecstack/blob/master/examples/01_regression.ipynb)
+        * [Classification with class labels](https://github.com/vecxoz/vecstack/blob/master/examples/02_classification_with_class_labels.ipynb)
+        * [Classification with probabilities + Detailed workflow](https://github.com/vecxoz/vecstack/blob/master/examples/03_classification_with_proba_detailed_workflow.ipynb)
+    * Scikit-learn API:
+        * [Regression + Multilevel stacking using Pipeline](https://github.com/vecxoz/vecstack/blob/master/examples/04_sklearn_api_regression_pipeline.ipynb)
+* Documentation:
+    * [Functional API](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L136) or type ```>>> help(stacking)```
+    * [Scikit-learn API](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L64) or type ```>>> help(StackingTransformer)```
 
 # Installation
 
@@ -51,186 +65,43 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 * Uninstall
     * `pip uninstall vecstack`
 
-# Usage
+# Usage. Functional API
 ```python
 from vecstack import stacking
 
 # Get your data
 
-# Initialize 1st level models
+# Initialize 1st level estimators
+models = [LinearRegression(),
+          Ridge(random_state=0)]
 
-# Get your stacking features in a single line
-S_train, S_test = stacking(models, X_train, y_train, X_test, regression = True, verbose = 2)
+# Get your stacked features in a single line
+S_train, S_test = stacking(models, X_train, y_train, X_test, regression=True, verbose=2)
 
-# Use 2nd level model with stacking features
+# Use 2nd level estimator with stacked features
 ```
 
-# Complete examples
-
-## Regression
-
+# Usage. Scikit-learn API
 ```python
-from sklearn.datasets import load_boston
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
-from vecstack import stacking
+from vecstack import StackingTransformer
 
-# Load demo data
-boston = load_boston()
-X, y = boston.data, boston.target
+# Get your data
 
-# Make train/test split
-# As usual in machine learning task we have X_train, y_train, and X_test
-X_train, X_test, y_train, y_test = train_test_split(X, y, 
-    test_size = 0.2, random_state = 0)
+# Initialize 1st level estimators
+estimators = [('lr', LinearRegression()),
+              ('ridge', Ridge(random_state=0))]
+              
+# Initialize StackingTransformer
+stack = StackingTransformer(estimators, regression=True, verbose=2)
 
-# Caution! All models and parameter values are just 
-# demonstrational and shouldn't be considered as recommended.
-# Initialize 1st level models.
-models = [
-    ExtraTreesRegressor(random_state = 0, n_jobs = -1, 
-        n_estimators = 100, max_depth = 3),
-        
-    RandomForestRegressor(random_state = 0, n_jobs = -1, 
-        n_estimators = 100, max_depth = 3),
-        
-    XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-        n_estimators = 100, max_depth = 3)]
-    
-# Compute stacking features
-S_train, S_test = stacking(models, X_train, y_train, X_test, 
-    regression = True, metric = mean_absolute_error, n_folds = 4, 
-    shuffle = True, random_state = 0, verbose = 2)
+# Fit
+stack = stack.fit(X_train, y_train)
 
-# Initialize 2nd level model
-model = XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-    n_estimators = 100, max_depth = 3)
-    
-# Fit 2nd level model
-model = model.fit(S_train, y_train)
+# Get your stacked features
+S_train = stack.transform(X_train)
+S_test = stack.transform(X_test)
 
-# Predict
-y_pred = model.predict(S_test)
-
-# Final prediction score
-print('Final prediction score: [%.8f]' % mean_absolute_error(y_test, y_pred))
-```
-
-```
-task:   [regression]
-metric: [mean_absolute_error]
-
-model 0: [ExtraTreesRegressor]
-    fold 0: [3.20733439]
-    fold 1: [2.87943130]
-    fold 2: [2.53026486]
-    fold 3: [2.83618694]
-    ----
-    MEAN:   [2.86330437]
-
-model 1: [RandomForestRegressor]
-    fold 0: [3.11110485]
-    fold 1: [2.78404210]
-    fold 2: [2.55707729]
-    fold 3: [2.32209992]
-    ----
-    MEAN:   [2.69358104]
-
-model 2: [XGBRegressor]
-    fold 0: [2.40318939]
-    fold 1: [2.37286982]
-    fold 2: [1.89121530]
-    fold 3: [1.95382831]
-    ----
-    MEAN:   [2.15527571]
-    
-Final prediction score: [2.78409065]
-```
-
-## Classification
-
-```python
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from vecstack import stacking
-
-# Load demo data
-iris = load_iris()
-X, y = iris.data, iris.target
-
-# Make train/test split
-# As usual in machine learning task we have X_train, y_train, and X_test
-X_train, X_test, y_train, y_test = train_test_split(X, y, 
-    test_size = 0.2, random_state = 0)
-
-# Caution! All models and parameter values are just 
-# demonstrational and shouldn't be considered as recommended.
-# Initialize 1st level models.
-models = [
-    ExtraTreesClassifier(random_state = 0, n_jobs = -1, 
-        n_estimators = 100, max_depth = 3),
-        
-    RandomForestClassifier(random_state = 0, n_jobs = -1, 
-        n_estimators = 100, max_depth = 3),
-        
-    XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-        n_estimators = 100, max_depth = 3)]
-    
-# Compute stacking features
-S_train, S_test = stacking(models, X_train, y_train, X_test, 
-    regression = False, metric = accuracy_score, n_folds = 4, 
-    stratified = True, shuffle = True, random_state = 0, verbose = 2)
-
-# Initialize 2nd level model
-model = XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-    n_estimators = 100, max_depth = 3)
-    
-# Fit 2nd level model
-model = model.fit(S_train, y_train)
-
-# Predict
-y_pred = model.predict(S_test)
-
-# Final prediction score
-print('Final prediction score: [%.8f]' % accuracy_score(y_test, y_pred))
-```
-
-```
-task:   [classification]
-metric: [accuracy_score]
-
-model 0: [ExtraTreesClassifier]
-    fold 0: [0.93548387]
-    fold 1: [0.96666667]
-    fold 2: [1.00000000]
-    fold 3: [0.89655172]
-    ----
-    MEAN:   [0.95000000]
-
-model 1: [RandomForestClassifier]
-    fold 0: [0.87096774]
-    fold 1: [0.96666667]
-    fold 2: [1.00000000]
-    fold 3: [0.93103448]
-    ----
-    MEAN:   [0.94166667]
-
-model 2: [XGBClassifier]
-    fold 0: [0.83870968]
-    fold 1: [0.93333333]
-    fold 2: [1.00000000]
-    fold 3: [0.93103448]
-    ----
-    MEAN:   [0.92500000]
-    
-Final prediction score: [0.96666667]
+# Use 2nd level estimator with stacked features
 ```
 
 # Stacking concept
