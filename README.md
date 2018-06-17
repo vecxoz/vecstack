@@ -282,7 +282,7 @@ You can also find some winning stacking architectures on [Kaggle blog](http://bl
 
 ***Note:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (blending) is diversity - low correlation between models.  
 
-For some example configurations see [Q16](https://github.com/vecxoz/vecstack#16-how-many-models-should-i-use-on-a-given-level)
+For some example configurations see [Q16](https://github.com/vecxoz/vecstack#16-how-many-models-should-i-use-on-a-given-stacking-level)
 
 ### 18. How do I choose models for stacking?
 
@@ -354,7 +354,7 @@ You can find out only by experiment. Default choice is variant ***A***, because 
     
 ### 25. How to choose number of folds?
 
-***Note:*** Remember that higher number of folds substantially increase training time (and RAM consumption for StackingTransformer). See [Q23](https://github.com/vecxoz/vecstack#23-how-to-estimate-training-time-and-number-of-models-which-will-be-built).  
+***Note:*** Remember that higher number of folds substantially increase training time (and RAM consumption for StackingTransformer). See [Q23](https://github.com/vecxoz/vecstack#23-how-to-estimate-stacking-training-time-and-number-of-models-which-will-be-built).  
 
 * Standard approach: 4 or 5 folds.
 * If data is big: 3 folds.
@@ -362,7 +362,7 @@ You can find out only by experiment. Default choice is variant ***A***, because 
     
 ### 26. When I transform train set I see 'Train set was detected'. What does it mean?
 
-Due to its nature stacking procedure treats train set and any other set differently. It means that transformation is different for train set and any other set. So if you are transforming `X_train` and see 'Train set was detected' everything is OK. If you meant to transform train set but you don't see this message then something went wrong. Possibly your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-stacking-procedure)  
+Due to its nature stacking procedure treats train set and any other set differently. It means that transformation is different for train set and any other set. So if you are transforming `X_train` and see 'Train set was detected' everything is OK. If you meant to transform train set but you don't see this message then something went wrong. Possibly your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-inner-procedure-for-stacking)  
 
 ***Note 1:*** It is NOT allowed to (substantially) change train set after training on it.  
 ***Note 2:*** To be correctly detected train set does not necessarily have to be identical (exactly the same). It must have the same shape and all values must be *close* (`np.isclose` is used for checking). So if you somehow regenerate your train set you should not worry.  
