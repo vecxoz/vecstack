@@ -364,11 +364,12 @@ You can find out only by experiment. Default choice is variant ***A***, because 
     
 ### 26. When I transform train set I see 'Train set was detected'. What does it mean?
 
-Due to its nature stacking procedure treats train set and any other set differently. It means that transformation is different for train set and any other set. So if you are transforming `X_train` and see 'Train set was detected' everything is OK. If you meant to transform train set but you don't see this message then something went wrong. Possibly your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-inner-procedure-for-stacking)  
+***Note 1:*** It is ***NOT allowed to change train set*** between calls to `fit` and `transform` methods. Due to stacking nature transformation is different for train set and any other set. If train set is changed after training, stacking procedure will not be able to correctly identify it and transformation will be wrong.  
 
-***Note 1:*** It is NOT allowed to (substantially) change train set after training on it.  
-***Note 2:*** To be correctly detected train set does not necessarily have to be identical (exactly the same). It must have the same shape and all values must be *close* (`np.isclose` is used for checking). So if you somehow regenerate your train set you should not worry.  
-    
+***Note 2:*** To be correctly detected train set does not necessarily have to be identical (exactly the same). It must have the same shape and all values must be *close* (`np.isclose` is used for checking). So if you somehow regenerate your train set you should not worry about numerical precision.  
+
+If you transform `X_train` and see 'Train set was detected' everything is OK. If you transform `X_train` but you don't see this message then something went wrong. Probably your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-inner-procedure-for-stacking)  
+
 ### 27. How is the very first stacking level called: L0 or L1? Where does counting start?
 
 ***Common convention:*** The very first bunch of models which are trained on initial raw data are called ***L1***. On top of L1 we have so called *stacker level* or *meta level* or L2 i.e. models which are trained on predictions of L1 models. Count continues in the same fashion up to arbitrary number of levels.  
