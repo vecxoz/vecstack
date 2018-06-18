@@ -264,13 +264,14 @@ By default you can start from blending. It is easier to apply and more chances t
 [Bagging](https://en.wikipedia.org/wiki/Bootstrap_aggregating) or Bootstrap aggregating works as follows: generate subsets of training set, train estimator on these subsets and then find average of predictions. When we train several different algorithms on the same data and then find average we can call this bagging as well. See [simple blending](https://github.com/vecxoz/vecstack#12-what-is-blending-how-is-it-related-to-stacking).  
     
 ### 16. How many models should I use on a given stacking level?
-    
-***Note:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (blending) is diversity - low correlation between models.  
+
+***Note 1:*** The best architecture can be found only by experiment.  
+***Note 2:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (blending) is diversity - low correlation between models.  
 
 It depends on many factors like type of problem, type of data, quality of models, correlation of models, expected result, etc.  
-Some configurations are listed below.  
+Some example configurations are listed below.  
 * Reasonable starting point:  
-    * `L1: 2-10 models -> L2: blend (weighted average)`
+    * `L1: 2-10 models -> L2: blend (weighted average) or single model`
 * Then try to add more 1st level models and additional level:  
     * `L1: 10-50 models -> L2: 2-10 models -> L3: blend (weighted average)`
 * If you're crunching numbers at Kaggle and decided to go wild:  
@@ -280,7 +281,8 @@ You can also find some winning stacking architectures on [Kaggle blog](http://bl
     
 ### 17. How many stacking levels should I use?
 
-***Note:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (blending) is diversity - low correlation between models.  
+***Note 1:*** The best architecture can be found only by experiment.  
+***Note 2:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (blending) is diversity - low correlation between models.  
 
 For some example configurations see [Q16](https://github.com/vecxoz/vecstack#16-how-many-models-should-i-use-on-a-given-stacking-level)
 
