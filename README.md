@@ -178,7 +178,7 @@ Often it is also called *stacked generalization*. The term is derived from the v
 
 It depends on specific business case. The main thing to know about stacking is that it requires ***significant computing resources***. [No Free Lunch Theorem](https://en.wikipedia.org/wiki/There_ain%27t_no_such_thing_as_a_free_lunch) applies as always. Stacking can give you an improvement but for certain price (deployment, computation, maintenance). Only experiment for given business case will give you an answer: is it worth an effort and money.  
 
-At current point large part of stacking users are participants of machine learning competitions. On Kaggle you can't go too far without ensembling. I can secretly tell you that at least top half of leaderboard in pretty much any competition uses stacking in some way. Stacking is less popular in production due to time and resource constraints, but I think it gains popularity.  
+At current point large part of stacking users are participants of machine learning competitions. On Kaggle you can't go too far without ensembling. I can secretly tell you that at least top half of leaderboard in pretty much any competition uses ensembling (stacking) in some way. Stacking is less popular in production due to time and resource constraints, but I think it gains popularity.  
    
 ### 7. Can you explain stacking (stacked generalization) in 10 lines of code?
 
@@ -216,7 +216,7 @@ Speaking about inner stacking mechanics, you should remember that when you have 
 ### 12. What is *blending*? How is it related to stacking?
 
 Basically it is the same thing. Both approaches use predictions as features.  
-Often this terms are used interchangably.  
+Often this terms are used interchangeably.  
 The difference is how we generate features (predictions) for the next level:  
 * *stacking*: perform cross-validation procedure and predict each part of train set (OOF)
 * *blending*: predict fixed holdout set
@@ -257,14 +257,14 @@ Some example configurations are listed below.
 * If you're crunching numbers at Kaggle and decided to go wild:  
     * `L1: 100-inf models -> L2: 10-50 models -> L3: 2-10 models -> L4: weighted (rank) average`
 
-You can also find some winning stacking architectures on [Kaggle blog](http://blog.kaggle.com/), e.g.: [1st place in Homesite Quote Conversion](http://blog.kaggle.com/2016/04/08/homesite-quote-conversion-winners-write-up-1st-place-kazanova-faron-clobber/)  
+You can also find some winning stacking architectures on [Kaggle blog](http://blog.kaggle.com/), e.g.: [1st place in Homesite Quote Conversion](http://blog.kaggle.com/2016/04/08/homesite-quote-conversion-winners-write-up-1st-place-kazanova-faron-clobber/).  
     
 ### 17. How many stacking levels should I use?
 
 ***Note 1:*** The best architecture can be found only by experiment.  
 ***Note 2:*** Always remember that higher number of levels or models does NOT guarantee better result. The key to success in stacking (and ensembling in general) is diversity - low correlation between models.  
 
-For some example configurations see [Q16](https://github.com/vecxoz/vecstack#16-how-many-models-should-i-use-on-a-given-stacking-level)
+For some example configurations see [Q16](https://github.com/vecxoz/vecstack#16-how-many-models-should-i-use-on-a-given-stacking-level).  
 
 ### 18. How do I choose models for stacking?
 
@@ -348,7 +348,7 @@ You can find out only by experiment. Default choice is variant ***A***, because 
 
 ***Note 2:*** To be correctly detected train set does not necessarily have to be identical (exactly the same). It must have the same shape and all values must be *close* (`np.isclose` is used for checking). So if you somehow regenerate your train set you should not worry about numerical precision.  
 
-If you transform `X_train` and see 'Train set was detected' everything is OK. If you transform `X_train` but you don't see this message then something went wrong. Probably your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-inner-procedure-for-stacking)  
+If you transform `X_train` and see 'Train set was detected' everything is OK. If you transform `X_train` but you don't see this message then something went wrong. Probably your train set was changed (it is not allowed). In this case you have to retrain `StackingTransformer`. For more details see [stacking tutorial](https://github.com/vecxoz/vecstack/blob/master/examples/00_stacking_concept_pictures_code.ipynb) or [Q8](https://github.com/vecxoz/vecstack#8-why-do-i-need-complicated-inner-procedure-for-stacking).  
 
 ### 27. How is the very first stacking level called: L0 or L1? Where does counting start?
 
