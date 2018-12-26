@@ -67,6 +67,11 @@ def roc_auc_score_universal(y_true, y_pred):
     """
     ohe = OneHotEncoder(sparse=False)
     y_true = ohe.fit_transform(y_true.reshape(-1, 1))
+    #@@@@
+    if len(y_pred.shape) == 1:
+        y_pred = np.c_[y_pred, y_pred]
+        y_pred[:, 0] = 1 - y_pred[:, 1]
+    #@@@@
     auc_score = roc_auc_score(y_true, y_pred)
     return auc_score
 

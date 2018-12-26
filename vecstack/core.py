@@ -413,11 +413,13 @@ def stacking(models, X_train, y_train, X_test,
                                  accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
                                  force_all_finite=False, # allow nan and inf because 
                                                          # some models (xgboost) can handle
+                                 allow_nd=True,
                                  multi_output=False) # do not allow several columns in y_train
                                  
     if X_test is not None: # allow X_test to be None for mode='oof'
         X_test = check_array(X_test,
                              accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
+                             allow_nd=True,
                              force_all_finite=False) # allow nan and inf because 
                                                      # some models (xgboost) can handle
     if sample_weight is not None:
