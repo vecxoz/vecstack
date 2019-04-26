@@ -128,7 +128,7 @@ def stacking(models, X_train, y_train, X_test,
              sample_weight=None, regression=True,
              transform_target=None, transform_pred=None,
              mode='oof_pred_bag', needs_proba=False, save_dir=None,
-             metric=None, n_folds=4, stratified=False,
+             metric=None, n_folds=4, folds=None, stratified=False,
              shuffle=False, random_state=0, verbose=0):
     """Function 'stacking' takes train data, test data and list of 1-st level
     models, and returns stacking features, which can be used with 2-nd level model.
@@ -243,6 +243,9 @@ def stacking(models, X_train, y_train, X_test,
         
     n_folds : int, default 4
         Number of folds in cross-validation
+
+    folds : scikit-learn splitter object or None, default None
+        generator or iterator of (train_idx, test_idx) tuples
         
     stratified : boolean, default False, meaningful only for classification task
         If True - use stratified folds in cross-validation
@@ -493,10 +496,13 @@ def stacking(models, X_train, y_train, X_test,
     #---------------------------------------------------------------------------
     # Split indices to get folds (stratified can be used only for classification)
     #---------------------------------------------------------------------------
-    if not regression and stratified:
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
+    if folds:
+        kf = folds
     else:
-        kf = KFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
+        if not regression and stratified:
+            kf = StratifiedKFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
+        else:
+            kf = KFold(n_splits = n_folds, shuffle = shuffle, random_state = random_state)
     #---------------------------------------------------------------------------
     # Compute number of classes (if we need probabilities) to create appropreate empty arrays
     # !!! Important. In order to unify array creation variable <n_classes> is always
