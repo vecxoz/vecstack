@@ -444,6 +444,8 @@ def stacking(models, X_train, y_train, X_test,
         raise ValueError('Parameter <n_folds> must be integer')
     if not n_folds > 1:
         raise ValueError('Parameter <n_folds> must be not less than 2')
+    if folds and not hasattr(folds, 'split'):
+        raise ValueError('Parameter <folds> should implement the `split` method')
     # <stratified>
     stratified = bool(stratified)
     # <shuffle>
