@@ -86,7 +86,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
 
     def test_variant_B_labels(self):
         # reference
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -94,7 +94,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -130,18 +130,18 @@ class TestSklearnClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             model = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1 = st.mode(S_test_temp, axis=1)[0]
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='A', random_state=0,
@@ -168,7 +168,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
 
     def test_variant_B_proba(self):
         # reference
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict_proba')
@@ -176,7 +176,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = model.predict_proba(X_test)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -214,20 +214,20 @@ class TestSklearnClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict_proba')
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='A', random_state=0,
@@ -264,21 +264,21 @@ class TestSklearnClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         # !!! Important. Here we pass CV-generator ``cv=kf`` not number of folds
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=kf, n_jobs=1, verbose=0,
                                       method='predict_proba')
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=True,
                                     variant='A', random_state=0,
@@ -308,14 +308,14 @@ class TestSklearnClassificationBinary(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_default_metric_and_scores_labels(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(accuracy_score)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -346,14 +346,14 @@ class TestSklearnClassificationBinary(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_custom_metric_and_scores_labels(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(zero_one_loss)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -385,14 +385,14 @@ class TestSklearnClassificationBinary(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_default_metric_and_scores_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(log_loss, needs_proba=True)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -424,14 +424,14 @@ class TestSklearnClassificationBinary(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_custom_metric_and_scores_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(roc_auc_score_universal, needs_proba=True)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0))]
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -464,7 +464,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
 
     def test_variant_B_2_estimators_labels(self):
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                         cv=n_folds, n_jobs=1, verbose=0,
                                         method='predict').reshape(-1, 1)
@@ -482,7 +482,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0)),
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -509,7 +509,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
 
     def test_variant_B_2_estimators_proba(self):
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                         cv=n_folds, n_jobs=1, verbose=0,
                                         method='predict_proba')
@@ -527,7 +527,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0)),
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -565,12 +565,12 @@ class TestSklearnClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             model = model.fit(X_tr, y_tr)
             S_test_temp_e1[:, fold_counter] = model.predict(X_test)
         S_test_1_e1 = st.mode(S_test_temp_e1, axis=1)[0]
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -599,7 +599,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0)),
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -638,14 +638,14 @@ class TestSklearnClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp_e1[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1_e1[:, class_id] = np.mean(S_test_temp_e1[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                          cv=n_folds, n_jobs=1, verbose=0,
                                          method='predict_proba')
@@ -677,7 +677,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]                              
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0)),
+        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -771,7 +771,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_variant_B_verbose(self):
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -780,7 +780,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         
         # verbose=0
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0))]
+        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -796,7 +796,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         
         # verbose=1
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0))]
+        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -812,7 +812,7 @@ class TestSklearnClassificationBinary(unittest.TestCase):
         
         # verbose=2
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0))]
+        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
