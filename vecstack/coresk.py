@@ -851,6 +851,35 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
+    def _random_choice(self, n, size, bound=2**30):
+        """
+        Memory efficient (but slower) version of np.random.choice
+
+        Parameters:
+        ===========
+        n : int
+            Upper value for range to chose from: [0, n).
+            This parameter is bounded (see bound).
+        size: int
+            Number of values to chose
+        bound : int
+            Upper random int for backward compatibility
+            with some older numpy versions
+
+        Returns:
+        ========
+        ids : 1d numpy array of shape (size, ) dtype=np.int32
+        """
+        ids = []
+        while len(ids) < size:
+            rnd = np.random.randint(min(bound, n))
+            if rnd not in ids:
+                ids.append(rnd)
+        return np.array(ids, dtype=np.int32)
+
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
     def _get_footprint(self, X, n_items=1000):
         """Selects ``n_items`` random elements from 2d numpy array or
         sparse matrix (or all elements if their number is less or equal
@@ -861,7 +890,11 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
             r, c = X.shape
             n = r * c
             # np.random.seed(0) # for development
-            ids = np.random.choice(n, min(n_items, n), replace=False)
+
+            # OOM with large arrays (see #29)
+            # ids = np.random.choice(n, min(n_items, n), replace=False)
+
+            ids = self._random_choice(n, min(n_items, n))
 
             for i in ids:
                 row = i // c

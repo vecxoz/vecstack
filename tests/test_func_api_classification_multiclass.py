@@ -22,7 +22,7 @@ import numpy as np
 import scipy.stats as st
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score
@@ -38,7 +38,27 @@ temp_dir = 'tmpdw35lg54ms80eb42'
 
 X, y = make_classification(n_samples = 500, n_features = 5, n_informative = 3, n_redundant = 1, 
                            n_classes = n_classes, flip_y = 0, random_state = 0)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+
+# Make train/test split by hand to avoid strange errors probably related to testing suit:
+# https://github.com/scikit-learn/scikit-learn/issues/1684
+# https://github.com/scikit-learn/scikit-learn/issues/1704
+# Note: Python 2.7, 3.4 - OK, but 3.5, 3.6 - error
+
+np.random.seed(0)
+ind = np.arange(500)
+np.random.shuffle(ind)
+
+ind_train = ind[:400]
+ind_test = ind[400:]
+
+X_train = X[ind_train]
+X_test = X[ind_test]
+
+y_train = y[ind_train]
+y_test = y[ind_test]
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -80,13 +100,13 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
 
     def test_oof_pred_mode(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0, stratified = True)
@@ -107,12 +127,12 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
     def test_oof_mode(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         S_test_1 = None
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
@@ -133,12 +153,12 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
     def test_pred_mode(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = None
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'pred', random_state = 0, verbose = 0, stratified = True)
@@ -168,16 +188,16 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1 = st.mode(S_test_temp, axis = 1)[0]
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -207,14 +227,14 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1 = st.mode(S_test_temp, axis = 1)[0]
     
         S_train_1 = None
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -239,13 +259,13 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
     def test_oof_pred_mode_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict_proba(X_test)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
             mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -266,12 +286,12 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
     def test_oof_mode_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         S_test_1 = None
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
             mode = 'oof', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -292,12 +312,12 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
     def test_pred_mode_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = None
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict_proba(X_test)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
             mode = 'pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -328,18 +348,18 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis = 1)
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
@@ -379,7 +399,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
@@ -388,7 +408,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
     
         S_train_1 = None
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
@@ -422,17 +442,17 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1 = st.mode(S_test_temp, axis = 1)[0]
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         # !!! Important. Here we pass CV-generator not number of folds <cv = kf>
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = kf, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = True, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -459,7 +479,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_oof_mode_metric(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(accuracy_score)
         scores = cross_val_score(model, X_train, y = y_train, cv = n_folds, 
             scoring = scorer, n_jobs = 1, verbose = 0)
@@ -467,7 +487,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         std_str_1 = '%.8f' % np.std(scores)
         
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
@@ -496,7 +516,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_oof_mode_metric_proba(self):
 
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         scorer = make_scorer(log_loss, needs_proba = True)
         scores = cross_val_score(model, X_train, y = y_train, cv = n_folds, 
             scoring = scorer, n_jobs = 1, verbose = 0)
@@ -504,7 +524,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         std_str_1 = '%.8f' % np.std(scores)
         
 
-        models = [LogisticRegression(random_state=0)]
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True, 
@@ -533,7 +553,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
     def test_oof_pred_mode_2_models(self):
 
         # Model a
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         _ = model.fit(X_train, y_train)
@@ -549,7 +569,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0),
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
@@ -581,12 +601,12 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
         S_test_1_a = st.mode(S_test_temp, axis = 1)[0]
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
             
@@ -612,7 +632,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0),
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
@@ -636,7 +656,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
     def test_oof_pred_mode_proba_2_models(self):
 
         # Model a
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         _ = model.fit(X_train, y_train)
@@ -652,7 +672,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0),
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
@@ -686,14 +706,14 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0)
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1_a[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis = 1)
     
-        model = LogisticRegression(random_state=0)
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
             
@@ -724,7 +744,7 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
         
 
-        models = [LogisticRegression(random_state=0),
+        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
