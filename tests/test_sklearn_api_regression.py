@@ -25,7 +25,7 @@ from sklearn.base import BaseEstimator
 from sklearn.base import RegressorMixin
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
@@ -50,7 +50,27 @@ temp_dir = 'tmpdw35lg54ms80eb42'
 
 boston = load_boston()
 X, y = boston.data, boston.target
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+
+# Make train/test split by hand to avoid strange errors probably related to testing suit:
+# https://github.com/scikit-learn/scikit-learn/issues/1684
+# https://github.com/scikit-learn/scikit-learn/issues/1704
+# Note: Python 2.7, 3.4 - OK, but 3.5, 3.6 - error
+
+np.random.seed(0)
+ind = np.arange(500)
+np.random.shuffle(ind)
+
+ind_train = ind[:400]
+ind_test = ind[400:]
+
+X_train = X[ind_train]
+X_test = X[ind_test]
+
+y_train = y[ind_train]
+y_test = y[ind_test]
+
 
 # -----------------------------------------------------------------------------
 # Scikit-learn INcompatible estimator 

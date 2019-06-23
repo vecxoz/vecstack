@@ -24,7 +24,7 @@ import numpy as np
 import scipy.stats as st
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 # from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.datasets import make_classification
@@ -48,9 +48,29 @@ X, y = make_classification(n_samples=500, n_features=5,
                            n_classes=n_classes, flip_y=0,
                            random_state=0)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    test_size=0.2,
-                                                    random_state=0)
+# X_train, X_test, y_train, y_test = train_test_split(X, y,
+#                                                     test_size=0.2,
+#                                                     random_state=0)
+
+
+# Make train/test split by hand to avoid strange errors probably related to testing suit:
+# https://github.com/scikit-learn/scikit-learn/issues/1684
+# https://github.com/scikit-learn/scikit-learn/issues/1704
+# Note: Python 2.7, 3.4 - OK, but 3.5, 3.6 - error
+
+np.random.seed(0)
+ind = np.arange(500)
+np.random.shuffle(ind)
+
+ind_train = ind[:400]
+ind_test = ind[400:]
+
+X_train = X[ind_train]
+X_test = X[ind_test]
+
+y_train = y[ind_train]
+y_test = y[ind_test]
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
