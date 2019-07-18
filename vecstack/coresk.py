@@ -54,7 +54,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import log_loss
-from sklearn.externals import six
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -946,7 +945,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
             return out
         out.update(estimators)
         for name, estimator in estimators:
-            for key, value in six.iteritems(estimator.get_params(deep=True)):
+            for key, value in estimator.get_params(deep=True).items():
                 out['%s__%s' % (name, key)] = value
         return out
 
