@@ -1640,6 +1640,24 @@ class TestSklearnRegression(unittest.TestCase):
         assert_raises(AssertionError, assert_raises, ValueError, stack._check_identity, X_train)
         # ``X`` argument is INcorrect - MUST raise
         assert_raises(ValueError, stack._check_identity, 5)
+
+    # -------------------------------------------------------------------------
+    # Test ``_random_choice`` method
+    # -------------------------------------------------------------------------
+    def test_random_choice(self):
+        # fit then transform
+        estimators = [('lr', LinearRegression())]
+        stack = StackingTransformer(estimators, regression=True,
+                                    n_folds=n_folds, shuffle=False,
+                                    variant='B', random_state=0,
+                                    verbose=0)
+        stack = stack.fit(X_train, y_train)
+        # very large range - must NOT raise
+        assert_raises(AssertionError, assert_raises, ValueError, stack._random_choice, 19999999999, 1000)
+        # ``size`` is less than ``n`` - must NOT raise
+        assert_raises(AssertionError, assert_raises, ValueError, stack._random_choice, 200, 20)
+        # ``size`` is greater than ``n`` - MUST raise
+        assert_raises(ValueError, stack._random_choice, 20, 200)
         
     # -------------------------------------------------------------------------
     # Test case where X_test has the same shape as X_train
@@ -1675,6 +1693,56 @@ class TestSklearnRegression(unittest.TestCase):
         assert_array_equal(S_train_1, S_train_2)
         assert_array_equal(S_test_1, S_test_2)
         
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
+    # -------------------------------------------------------------------------
+    # Test small input
+    # -------------------------------------------------------------------------
+
+    def test_small_input(self):
+        """
+        This is `test_variant_A` with small input data
+        Train: 20 examples
+        Test: 10 examples
+        """
+        S_test_temp = np.zeros((X_test[:10].shape[0], n_folds))
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train[:20], y_train[:20])):
+            # Split data and target
+            X_tr = X_train[:20][tr_index]
+            y_tr = y_train[:20][tr_index]
+            # X_te = X_train[:20][te_index]
+            # y_te = y_train[:20][te_index]
+            model = LinearRegression()
+            model = model.fit(X_tr, y_tr)
+            S_test_temp[:, fold_counter] = model.predict(X_test[:10])
+        S_test_1 = np.mean(S_test_temp, axis=1).reshape(-1, 1)
+
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train[:20], y=y_train[:20],
+                                      cv=n_folds, n_jobs=1, verbose=0,
+                                      method='predict').reshape(-1, 1)
+
+        # fit then transform
+        estimators = [('lr', LinearRegression())]
+        stack = StackingTransformer(estimators, regression=True,
+                                    n_folds=n_folds, shuffle=False,
+                                    variant='A', random_state=0,
+                                    verbose=0)
+        stack = stack.fit(X_train[:20], y_train[:20])
+        S_train_2 = stack.transform(X_train[:20])
+        S_test_2 = stack.transform(X_test[:10])
+
+        # fit_transform
+        # also check refitting already fitted transformer
+        S_train_3 = stack.fit_transform(X_train[:20], y_train[:20])
+        S_test_3 = stack.transform(X_test[:10])
+
+        # compare
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
 

@@ -2,10 +2,14 @@
 # check if .travis.yml is valid: http://lint.travis-ci.org/
 # to skip build for given commit put [ci skip] or [skip ci] in commit message
 
+# required for Python >= 3.7
+dist: xenial
+
 language: python
 
-# versions supported by scikit-learn
+# versions supported by scikit-learn and some additional versions
 python:
+  - "3.7"
   - "3.6"
   - "3.5"
   - "3.4"
@@ -16,6 +20,7 @@ branches:
   only:
   - master
   - dev
+  - py2
 
 install:
   - pip install numpy

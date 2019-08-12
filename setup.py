@@ -2,10 +2,15 @@
 
 from setuptools import setup
 
+long_desc = '''
+Python package for stacking (stacked generalization) featuring lightweight functional API and fully compatible scikit-learn API.
+Convenient way to automate OOF computation, prediction and bagging using any number of models.
+'''
+
 setup(name='vecstack',
-      version='0.3.0',
+      version='0.4.0',
       description='Python package for stacking (machine learning technique)',
-      long_description='Convenient way to automate OOF computation, prediction and bagging using any number of models',
+      long_description=long_desc,
       classifiers=[
           'License :: OSI Approved :: MIT License',
           'Operating System :: MacOS',
@@ -13,12 +18,10 @@ setup(name='vecstack',
           'Operating System :: POSIX',
           'Operating System :: Unix',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
           'Topic :: Scientific/Engineering',
           'Topic :: Scientific/Engineering :: Artificial Intelligence',
           'Topic :: Scientific/Engineering :: Information Analysis',

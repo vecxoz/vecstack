@@ -22,10 +22,10 @@ Convenient way to automate OOF computation, prediction and bagging using any num
     * Predict [class labels or probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L119) in classification task
     * Apply any [user-defined metric](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L124)
     * Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L87) for target and prediction
-    * Python 2, Python 3
+    * Python 3.5 and higher, [unofficial support for Python 2.7 and 3.4](https://github.com/vecxoz/vecstack/blob/master/PY2.md)
     * Win, Linux, Mac
     * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
-    * Depends on **numpy**, **scipy**, **scikit-learn>=18.0**
+    * Depends on **numpy**, **scipy**, **scikit-learn>=0.18**
 
 # Get started
 * [FAQ](https://github.com/vecxoz/vecstack#stacking-faq)
@@ -292,14 +292,15 @@ Stacking API comparison:
 | Estimator implementation restrictions | Must have only `fit` and `predict` (`predict_proba`) methods | Must be fully scikit-learn compatible |
 | `NaN` and `inf` in input data | Allowed | Not allowed |
 | Can automatically save OOF and log in files | Yes | No |
+| Input dimensionality (`X_train`, `X_test`) | Arbitrary | 2-D |
     
 ### 21. How do parameters of `stacking` function and `StackingTransformer` correspond?
 
-| **stacking function**   | **StackingTransformer**           |
-|-------------------------|-----------------------------------|
-| `models=[Ridge()]`      | `estimators=[('ridge', Ridge())]` |
-| `mode='oof_pred_bag'`   | `variant='A'`                     |
-| `mode='oof_pred'`       | `variant='B'`                     |
+| **stacking function**                 | **StackingTransformer**           |
+|---------------------------------------|-----------------------------------|
+| `models=[Ridge()]`                    | `estimators=[('ridge', Ridge())]` |
+| `mode='oof_pred_bag'` (alias `'A'`)   | `variant='A'`                     |
+| `mode='oof_pred'` (alias `'B'`)       | `variant='B'`                     |
     
 ### 22. Why Scikit-learn API was implemented as transformer and not predictor?
 

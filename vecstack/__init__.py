@@ -38,7 +38,7 @@ from .coresk import StackingTransformer
 
 __author__ = 'Igor Ivanov > kaggle.com/vecxoz'
 __license__ = 'MIT'
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 __all__ = ['stacking', 'StackingTransformer']
 
