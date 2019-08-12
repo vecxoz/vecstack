@@ -16,6 +16,7 @@ NOTE. It will require legacy versions of the following packages:
 * numpy<1.17
 * scipy<1.3
 * scikit-learn>=0.18,<0.21
+
 There is a dedicated branch on GitHub called `py2` with appropriate requirements in `setup.py`.  
 Installation:  
 
