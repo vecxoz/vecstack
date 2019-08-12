@@ -37,9 +37,9 @@ setup(name='vecstack',
       license='MIT',
       packages=['vecstack'],
       install_requires=[
-          'numpy',
-          'scipy',
-          'scikit-learn>=0.18'
+          'numpy<1.17',
+          'scipy<1.3',
+          'scikit-learn>=0.18,<0.21'
       ],
       test_suite='nose.collector',
       tests_require=['nose'],
