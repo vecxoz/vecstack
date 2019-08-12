@@ -145,7 +145,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -171,7 +171,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -197,7 +197,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -236,7 +236,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -273,7 +273,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -304,7 +304,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -330,7 +330,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -356,7 +356,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -398,7 +398,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
         
@@ -447,7 +447,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
     
@@ -491,7 +491,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -609,7 +609,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -672,7 +672,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -712,7 +712,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
@@ -784,7 +784,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
         
@@ -834,7 +834,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Normally if cleaning is performed there is only one .npy file at given moment
         # But if we have no cleaning there may be more then one file so we take the latest
         file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
-        S = np.load(file_name)
+        S = np.load(file_name, allow_pickle=True)
         S_train_3 = S[0]
         S_test_3 = S[1]
 
