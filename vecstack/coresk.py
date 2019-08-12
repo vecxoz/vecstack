@@ -54,7 +54,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import log_loss
-from sklearn.externals import six
+from sklearn.metrics import mean_squared_error
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -853,7 +853,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
 
     def _random_choice(self, n, size, bound=2**30):
         """
-        Memory efficient (but slower) version of np.random.choice
+        Memory efficient substitute for np.random.choice without replacement
 
         Parameters:
         ===========
@@ -870,12 +870,21 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         ========
         ids : 1d numpy array of shape (size, ) dtype=np.int32
         """
-        ids = []
-        while len(ids) < size:
-            rnd = np.random.randint(min(bound, n))
-            if rnd not in ids:
-                ids.append(rnd)
-        return np.array(ids, dtype=np.int32)
+        try:
+            if n < size:
+                raise ValueError('Drawing without replacement: '
+                                 '``n`` cannot be less than ``size``')
+
+            ids = []
+            while len(ids) < size:
+                rnd = np.random.randint(min(bound, n))
+                if rnd not in ids:
+                    ids.append(rnd)
+            return np.array(ids, dtype=np.int32)
+
+        except Exception:
+            raise ValueError('Internal error. '
+                             'Please save traceback and inform developers.')
 
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
@@ -946,7 +955,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
             return out
         out.update(estimators)
         for name, estimator in estimators:
-            for key, value in six.iteritems(estimator.get_params(deep=True)):
+            for key, value in iter(estimator.get_params(deep=True).items()):
                 out['%s__%s' % (name, key)] = value
         return out
 

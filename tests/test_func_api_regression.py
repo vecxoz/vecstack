@@ -136,7 +136,34 @@ class TestFuncRegression(unittest.TestCase):
         
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
-        
+
+    def test_B_mode(self):
+        """ 'B' is alias for 'oof_pred' """
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds,
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        _ = model.fit(X_train, y_train)
+        S_test_1 = model.predict(X_test).reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test,
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'B', random_state = 0, verbose = 0)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
     def test_oof_mode(self):
 
         model = LinearRegression()
@@ -224,6 +251,44 @@ class TestFuncRegression(unittest.TestCase):
         assert_array_equal(S_train_1, S_train_2)
         assert_array_equal(S_test_1, S_test_2)
         
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
+    def test_A_mode(self):
+        """ 'A' is alias for 'oof_pred_bag' """
+        S_test_temp = np.zeros((X_test.shape[0], n_folds))
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
+            # Split data and target
+            X_tr = X_train[tr_index]
+            y_tr = y_train[tr_index]
+            X_te = X_train[te_index]
+            y_te = y_train[te_index]
+            model = LinearRegression()
+            _ = model.fit(X_tr, y_tr)
+            S_test_temp[:, fold_counter] = model.predict(X_test)
+        S_test_1 = np.mean(S_test_temp, axis = 1).reshape(-1, 1)
+
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds,
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test,
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'A', random_state = 0, verbose = 0)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
     
@@ -811,9 +876,9 @@ class TestFuncRegression(unittest.TestCase):
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
     
-    #-------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     # Test inconsistent data shape or type
-    #-------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     def test_inconsistent_data(self):
         # nan or inf in y
         y_train_nan = y_train.copy()
@@ -828,7 +893,53 @@ class TestFuncRegression(unittest.TestCase):
         # X_train and y_train shape nismatch
         assert_raises(ValueError, stacking, [LinearRegression()], 
                       X_train, y_train[:10], X_test)
+
+    #---------------------------------------------------------------------------
+    # Test small input
+    #---------------------------------------------------------------------------
+
+    def test_small_input(self):
+        """
+        This is `test_oof_pred_bag_mode` with small input data
+        Train: 20 examples
+        Test: 10 examples
+        """
+        S_test_temp = np.zeros((X_test[:10].shape[0], n_folds))
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train[:20], y_train[:20])):
+            # Split data and target
+            X_tr = X_train[:20][tr_index]
+            y_tr = y_train[:20][tr_index]
+            X_te = X_train[:20][te_index]
+            y_te = y_train[:20][te_index]
+            model = LinearRegression()
+            _ = model.fit(X_tr, y_tr)
+            S_test_temp[:, fold_counter] = model.predict(X_test[:10])
+        S_test_1 = np.mean(S_test_temp, axis = 1).reshape(-1, 1)
     
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train[:20], y = y_train[:20], cv = n_folds, 
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train[:20], y_train[:20], X_test[:10], 
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred_bag', random_state = 0, verbose = 0)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 

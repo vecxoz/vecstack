@@ -60,6 +60,33 @@ y_train = y[ind_train]
 y_test = y[ind_test]
 
 
+# Create 4-dim data
+np.random.seed(42)
+X_train_4d = np.random.normal(size=(400, 8, 8, 3))
+X_test_4d = np.random.normal(size=(100, 8, 8, 3))
+y_train_4d = np.random.randint(n_classes, size=400)
+
+# Reshape 4-dim to 2-dim
+X_train_4d_unrolled = X_train_4d.reshape(X_train_4d.shape[0], -1)
+X_test_4d_unrolled = X_test_4d.reshape(X_test_4d.shape[0], -1)
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class LogisticRegressionUnrolled(LogisticRegression):
+    """
+    For tests related to N-dim input.
+    Estimator accepts N-dim array and reshape it to 2-dim array
+    """
+    def fit(self, X, y):
+        return super(LogisticRegressionUnrolled, self).fit(X.reshape(X.shape[0], -1), y)
+
+    def predict(self, X):
+        return super(LogisticRegressionUnrolled, self).predict(X.reshape(X.shape[0], -1))
+
+    def predict_proba(self, X):
+        return super(LogisticRegressionUnrolled, self).predict_proba(X.reshape(X.shape[0], -1))
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
@@ -772,7 +799,49 @@ class TestFuncClassificationMulticlass(unittest.TestCase):
         
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
+
+
+    def test_N_dim_input(self):
+        """
+        This is `test_oof_pred_bag_mode` function with `LogisticRegressionUnrolled` estimator
+        """
+        S_test_temp = np.zeros((X_test_4d_unrolled.shape[0], n_folds))
+        # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train_4d_unrolled, y_train_4d)):
+            # Split data and target
+            X_tr = X_train_4d_unrolled[tr_index]
+            y_tr = y_train_4d[tr_index]
+            X_te = X_train_4d_unrolled[te_index]
+            y_te = y_train_4d[te_index]
+            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            _ = model.fit(X_tr, y_tr)
+            S_test_temp[:, fold_counter] = model.predict(X_test_4d_unrolled)
+        S_test_1 = st.mode(S_test_temp, axis = 1)[0]
     
+        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        S_train_1 = cross_val_predict(model, X_train_4d_unrolled, y = y_train_4d, cv = n_folds,
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+
+        models = [LogisticRegressionUnrolled(random_state=0, solver='liblinear', multi_class='ovr')]
+        S_train_2, S_test_2 = stacking(models, X_train_4d, y_train_4d, X_test_4d,
+            regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 

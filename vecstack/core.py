@@ -145,13 +145,13 @@ def stacking(models, X_train, y_train, X_test,
         task with probabilities model must return probabilities 
         for each class (i.e. two columns).
         
-    X_train : numpy array or sparse matrix of shape [n_train_samples, n_features]
+    X_train : numpy array or sparse matrix of N-dim shape, e.g. 2-dim [n_train_samples, n_features]
         Training data
     
     y_train : numpy 1d array
         Target values
         
-    X_test : numpy array or sparse matrix of shape [n_test_samples, n_features]
+    X_test : numpy array or sparse matrix of N-dim shape, e.g. 2-dim [n_test_samples, n_features]
         Test data
         
     sample_weight : numpy array of shape [n_train_samples]
@@ -186,11 +186,11 @@ def stacking(models, X_train, y_train, X_test,
             respective backward transformation like numpy.expm1.
         Look at description of parameter transform_target
         
-    mode: str, default 'oof_pred_bag'
+    mode: str, default 'oof_pred_bag' (alias 'A')
         Note: for detailes see terminology below
         'oof' - return only oof
-        'oof_pred' - return oof and pred
-        'oof_pred_bag' - return oof and bagged pred
+        'oof_pred' (alias 'B') - return oof and pred
+        'oof_pred_bag' (alias 'A') - return oof and bagged pred
         'pred' - return pred only
         'pred_bag' - return bagged pred only
         Terminology:
@@ -427,7 +427,7 @@ def stacking(models, X_train, y_train, X_test,
     # <regression>
     regression = bool(regression)
     # If wrong <mode>
-    if mode not in ['pred', 'pred_bag', 'oof', 'oof_pred', 'oof_pred_bag']:
+    if mode not in ['pred', 'pred_bag', 'oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
         raise ValueError('Parameter <mode> must be set properly')
     # <needs_proba>
     needs_proba = bool(needs_proba)
@@ -511,7 +511,7 @@ def stacking(models, X_train, y_train, X_test,
     #---------------------------------------------------------------------------
     # Create empty numpy arrays for OOF
     #---------------------------------------------------------------------------
-    if mode in ['oof_pred', 'oof_pred_bag']:
+    if mode in ['oof_pred', 'B', 'oof_pred_bag', 'A']:
         S_train = np.zeros(( X_train.shape[0], len(models) * n_classes ))
         S_test = np.zeros(( X_test.shape[0], len(models) * n_classes ))
     elif mode in ['oof']:
@@ -542,7 +542,7 @@ def stacking(models, X_train, y_train, X_test,
             print(model_str)
             
         # Create empty numpy array, which will contain temporary predictions for test set made in each fold
-        if mode in ['pred_bag', 'oof_pred_bag']:
+        if mode in ['pred_bag', 'oof_pred_bag', 'A']:
             S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         
         # Create empty array to store scores for each fold (to find mean)
@@ -551,7 +551,7 @@ def stacking(models, X_train, y_train, X_test,
         #-----------------------------------------------------------------------
         # Loop across folds
         #-----------------------------------------------------------------------
-        if mode in ['pred_bag', 'oof', 'oof_pred', 'oof_pred_bag']:
+        if mode in ['pred_bag', 'oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
             for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
                 # Split data and target
                 X_tr = X_train[tr_index]
@@ -572,11 +572,11 @@ def stacking(models, X_train, y_train, X_test,
                 model = clone(model, safe=False)
                 
                 # Fit 1-st level model
-                if mode in ['pred_bag', 'oof', 'oof_pred', 'oof_pred_bag']:
+                if mode in ['pred_bag', 'oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
                     _ = model_action(model, X_tr, y_tr, None, sample_weight = sample_weight_tr, action = 'fit', transform = transform_target)
                     
                 # Predict out-of-fold part of train set
-                if mode in ['oof', 'oof_pred', 'oof_pred_bag']:
+                if mode in ['oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
                     if 'predict_proba' == action:
                         col_slice_model = slice(model_counter * n_classes, model_counter * n_classes + n_classes)
                     else:
@@ -584,7 +584,7 @@ def stacking(models, X_train, y_train, X_test,
                     S_train[te_index, col_slice_model] = model_action(model, None, None, X_te, action = action, transform = transform_pred)
                     
                 # Predict full test set in each fold
-                if mode in ['pred_bag', 'oof_pred_bag']:
+                if mode in ['pred_bag', 'oof_pred_bag', 'A']:
                     if 'predict_proba' == action:
                         col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
                     else:
@@ -592,7 +592,7 @@ def stacking(models, X_train, y_train, X_test,
                     S_test_temp[:, col_slice_fold] = model_action(model, None, None, X_test, action = action, transform = transform_pred)
                         
                 # Compute scores
-                if mode in ['oof', 'oof_pred', 'oof_pred_bag']:
+                if mode in ['oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
                     if save_dir is not None or verbose > 0:
                         score = metric(y_te, S_train[te_index, col_slice_model])
                         scores = np.append(scores, score)
@@ -603,7 +603,7 @@ def stacking(models, X_train, y_train, X_test,
                         print(fold_str)
                 
         # Compute mean or mode of predictions for test set in bag modes
-        if mode in ['pred_bag', 'oof_pred_bag']:
+        if mode in ['pred_bag', 'oof_pred_bag', 'A']:
             if 'predict_proba' == action:
                 # Here we copute means of probabilirties for each class
                 for class_id in range(n_classes):
@@ -615,7 +615,7 @@ def stacking(models, X_train, y_train, X_test,
                     S_test[:, model_counter] = st.mode(S_test_temp, axis = 1)[0].ravel()
             
         # Compute scores: mean + std and full
-        if mode in ['oof', 'oof_pred', 'oof_pred_bag']:
+        if mode in ['oof', 'oof_pred', 'B', 'oof_pred_bag', 'A']:
             if save_dir is not None or verbose > 0:
                 sep_str = '    ----'
                 mean_str = '    MEAN:     [%.8f] + [%.8f]' % (np.mean(scores), np.std(scores))
@@ -630,7 +630,7 @@ def stacking(models, X_train, y_train, X_test,
                 print(full_str)
                 
         # Fit model on full train set and predict test set
-        if mode in ['pred', 'oof_pred']:
+        if mode in ['pred', 'oof_pred', 'B']:
             if verbose > 0:
                 print('    Fitting on full train set...\n')
             _ = model_action(model, X_train, y_train, None, sample_weight = sample_weight, action = 'fit', transform = transform_target)
