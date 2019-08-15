@@ -48,7 +48,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 
 # Installation
 
-***Note:*** On Linux don't forget to use `pip/pip3` (or `python/python3`) to install package for desired version  
+***Note:*** Python 3.5 or higher is required. If you’re still using Python 2.7 or 3.4 see [installation details here](https://github.com/vecxoz/vecstack/blob/master/PY2.md)  
 
 * ***Classic 1st time installation (recommended):*** 
     * `pip install vecstack`
