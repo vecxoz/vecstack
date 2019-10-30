@@ -828,9 +828,13 @@ class TestFuncRegression(unittest.TestCase):
                       X_train, y_train, X_test, verbose=25)
                       
         # Internal function model_action
-        assert_raises(ValueError, model_action, LinearRegression(), 
-                      X_train, y_train, X_test, sample_weight=None, 
+        assert_raises(ValueError, model_action, LinearRegression(),
+                      X_train, y_train, X_test, sample_weight=None,
                       action='abc', transform=None)
+
+        # X_test is None when mode != 'oof'
+        assert_raises(ValueError, stacking, [LinearRegression()],
+                      X_train, y_train, None, mode='oof_pred_bag')
                       
     #---------------------------------------------------------------------------
     # Testing parameter warnings
@@ -939,6 +943,80 @@ class TestFuncRegression(unittest.TestCase):
 
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
+
+    #---------------------------------------------------------------------------
+    # Mode 'oof', X_test=None
+    #---------------------------------------------------------------------------
+
+    def test_oof_mode_with_none(self):
+
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds,
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+        S_test_1 = None
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, None,
+            regression = True, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
+            mode = 'oof', random_state = 0, verbose = 0)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name, allow_pickle=True)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
+    #---------------------------------------------------------------------------
+    # All default values (mode='oof_pred_bag')
+    #---------------------------------------------------------------------------
+
+    def test_all_defaults(self):
+
+        # Override global n_folds=5, because default value in stacking function is 4
+        n_folds=4
+
+        S_test_temp = np.zeros((X_test.shape[0], n_folds))
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
+            # Split data and target
+            X_tr = X_train[tr_index]
+            y_tr = y_train[tr_index]
+            X_te = X_train[te_index]
+            y_te = y_train[te_index]
+            model = LinearRegression()
+            _ = model.fit(X_tr, y_tr)
+            S_test_temp[:, fold_counter] = model.predict(X_test)
+        S_test_1 = np.mean(S_test_temp, axis = 1).reshape(-1, 1)
+
+        model = LinearRegression()
+        S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds,
+            n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
+
+        models = [LinearRegression()]
+        S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, save_dir=temp_dir)
+
+        # Load OOF from file
+        # Normally if cleaning is performed there is only one .npy file at given moment
+        # But if we have no cleaning there may be more then one file so we take the latest
+        file_name = sorted(glob.glob(os.path.join(temp_dir, '*.npy')))[-1] # take the latest file
+        S = np.load(file_name, allow_pickle=True)
+        S_train_3 = S[0]
+        S_test_3 = S[1]
+
+        assert_array_equal(S_train_1, S_train_2)
+        assert_array_equal(S_test_1, S_test_2)
+
+        assert_array_equal(S_train_1, S_train_3)
+        assert_array_equal(S_test_1, S_test_3)
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------

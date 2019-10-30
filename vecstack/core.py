@@ -151,13 +151,14 @@ def stacking(models, X_train, y_train, X_test,
     y_train : numpy 1d array
         Target values
         
-    X_test : numpy array or sparse matrix of N-dim shape, e.g. 2-dim [n_test_samples, n_features]
+    X_test : numpy array or sparse matrix of N-dim shape, e.g. 2-dim [n_test_samples, n_features], or None
         Test data
+        Note: X_test can be set to None when mode='oof'
         
-    sample_weight : numpy array of shape [n_train_samples]
+    sample_weight : numpy array of shape [n_train_samples], default None
         Individual weights for each sample (passed to fit method of the model).
-        Note: sample_weight has length of full training set X_train and it would be
-        split automatically for each fold.
+        Note: sample_weight must have the same length as full training set X_train.
+            It will be split automatically for each fold.
         
     regression : boolean, default True
         If True - perform stacking for regression task, 
@@ -188,7 +189,7 @@ def stacking(models, X_train, y_train, X_test,
         
     mode: str, default 'oof_pred_bag' (alias 'A')
         Note: for detailes see terminology below
-        'oof' - return only oof
+        'oof' - return only oof. X_test can be set to None
         'oof_pred' (alias 'B') - return oof and pred
         'oof_pred_bag' (alias 'A') - return oof and bagged pred
         'pred' - return pred only
@@ -406,6 +407,9 @@ def stacking(models, X_train, y_train, X_test,
     # If empty <models> list
     if 0 == len(models):
         raise ValueError('List of models is empty')
+    # X_test can be None only if mode='oof'
+    if X_test is None and mode != 'oof':
+        raise ValueError("X_test can be None only if mode='oof'")
     # Check arrays
     # y_train and sample_weight must be 1d ndarrays (i.e. row, not column)
     X_train, y_train = check_X_y(X_train,
