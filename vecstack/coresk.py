@@ -143,6 +143,12 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         If True - use stratified folds in cross-validation
         Ignored if ``regression=True``
 
+    cv_iterable : trainndarray
+                    The training set indices for that split.
+
+                  testndarray
+                    The testing set indices for that split.
+
     shuffle : boolean, default False
         Whether to perform a shuffle before cross-validation split
 
@@ -264,6 +270,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
                  stratified=False,
                  shuffle=False,
                  random_state=0,
+                 cv_iterable=None
                  verbose=0):
 
         self.estimators = estimators
@@ -278,6 +285,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         self.shuffle = shuffle
         self.random_state = random_state
         self.verbose = verbose
+        self.cv_iterable = cv_iterable
 
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
@@ -429,18 +437,23 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         # Initialize cross-validation split
         # Stratified can be used only for classification
         # ---------------------------------------------------------------------
-        if not self.regression and self.stratified:
+
+        if (self.cv_iterable is None) and not self.regression and self.stratified:
             self.kf_ = StratifiedKFold(n_splits=self.n_folds,
                                        shuffle=self.shuffle,
                                        random_state=self.random_state)
             # Save target to be able to create stratified split in ``transform`` method
             # This is more efficient than to save split indices
             self._y_ = y.copy()
-        else:
+            self.cv_iterable = self.kf_.split(X, self._y_)
+        elif self.cv_iterable is None:
             self.kf_ = KFold(n_splits=self.n_folds,
                              shuffle=self.shuffle,
                              random_state=self.random_state)
             self._y_ = None
+            self.cv_iterable = self.kf_.split(X, self._y_)
+        else:
+            print("Using Custom Indices.")
 
         # ---------------------------------------------------------------------
         # Compute implicit number of classes to create appropriate empty arrays.
@@ -501,7 +514,8 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
             # -----------------------------------------------------------------
             # Loop across folds
             # -----------------------------------------------------------------
-            for fold_counter, (tr_index, te_index) in enumerate(self.kf_.split(X, y)):
+
+            for fold_counter, (tr_index, te_index) in enumerate(self.cv_iterable):
                 # Split data and target
                 X_tr = X[tr_index]
                 y_tr = y[tr_index]
@@ -676,7 +690,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
                 # -------------------------------------------------------------
                 # Loop across folds
                 # -------------------------------------------------------------
-                for fold_counter, (tr_index, te_index) in enumerate(self.kf_.split(X, self._y_)):
+                for fold_counter, (tr_index, te_index) in enumerate(self.cv_iterable):
                     # Split data
                     # X_tr = X[tr_index]
                     X_te = X[te_index]
