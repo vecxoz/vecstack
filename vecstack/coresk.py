@@ -270,7 +270,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
                  stratified=False,
                  shuffle=False,
                  random_state=0,
-                 cv_iterable=None
+                 cv_iterable=None,
                  verbose=0):
 
         self.estimators = estimators
