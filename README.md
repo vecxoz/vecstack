@@ -216,7 +216,7 @@ Speaking about inner stacking mechanics, you should remember that when you have 
 ### 12. What is *blending*? How is it related to stacking?
 
 Basically it is the same thing. Both approaches use predictions as features.  
-Often this terms are used interchangeably.  
+Often these terms are used interchangeably.  
 The difference is how we generate features (predictions) for the next level:  
 * *stacking*: perform cross-validation procedure and predict each part of train set (OOF)
 * *blending*: predict fixed holdout set
