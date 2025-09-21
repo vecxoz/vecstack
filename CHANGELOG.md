@@ -1,5 +1,17 @@
 # Changelog
 
+### v0.5.0 -- September 8, 2025 -- Maintenance release
+
+* Python 3.9+
+* Testing: pytest and pytest-cov
+* CI: GitHub Actions
+
+* Scikit-learn API:
+  * Fixed `_set_params` method which was not resetting individual estimators in the `estimators` collection
+
+* Functional API
+  * Fixed saving OOF arrays in file
+
 ### v0.4.0 -- August 12, 2019
 
 Since v0.4.0 vecstack provides official support for Python 3.5 and higher only,  

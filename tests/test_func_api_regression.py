@@ -26,7 +26,8 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
 # from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
-from sklearn.datasets import load_boston
+# from sklearn.datasets import load_boston
+from sklearn.datasets import fetch_openml
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import make_scorer
 from sklearn.linear_model import LinearRegression
@@ -37,8 +38,10 @@ from vecstack.core import model_action
 n_folds = 5
 temp_dir = 'tmpdw35lg54ms80eb42'
 
-boston = load_boston()
-X, y = boston.data, boston.target
+# boston = load_boston()
+boston = fetch_openml(name='boston', version=1, as_frame=False, parser='auto')
+# X, y = boston.data, boston.target
+X, y = boston.data.astype(float), boston.target.astype(float)
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
 
@@ -219,7 +222,7 @@ class TestFuncRegression(unittest.TestCase):
     def test_oof_pred_bag_mode(self):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -257,7 +260,7 @@ class TestFuncRegression(unittest.TestCase):
     def test_A_mode(self):
         """ 'A' is alias for 'oof_pred_bag' """
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -295,7 +298,7 @@ class TestFuncRegression(unittest.TestCase):
     def test_pred_bag_mode(self):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -338,7 +341,7 @@ class TestFuncRegression(unittest.TestCase):
         model = LinearRegression()
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict', 
-            fit_params = {'sample_weight': sw}).reshape(-1, 1)
+            params = {'sample_weight': sw}).reshape(-1, 1)
         _ = model.fit(X_train, y_train, sample_weight = sw)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
@@ -373,7 +376,7 @@ class TestFuncRegression(unittest.TestCase):
         model = LinearRegression()
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict', 
-            fit_params = {'sample_weight': sw}).reshape(-1, 1)
+            params = {'sample_weight': sw}).reshape(-1, 1)
         _ = model.fit(X_train, y_train, sample_weight = sw)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
@@ -571,7 +574,7 @@ class TestFuncRegression(unittest.TestCase):
         
         # Model a
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -589,7 +592,7 @@ class TestFuncRegression(unittest.TestCase):
             
         # Model b
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -909,7 +912,7 @@ class TestFuncRegression(unittest.TestCase):
         Test: 10 examples
         """
         S_test_temp = np.zeros((X_test[:10].shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train[:20], y_train[:20])):
             # Split data and target
             X_tr = X_train[:20][tr_index]
@@ -984,7 +987,7 @@ class TestFuncRegression(unittest.TestCase):
         n_folds=4
 
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = KFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]

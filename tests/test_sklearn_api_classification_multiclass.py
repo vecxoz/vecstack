@@ -14,6 +14,7 @@ import unittest
 from numpy.testing import assert_array_equal
 # from numpy.testing import assert_allclose
 from numpy.testing import assert_equal
+from numpy.testing import assert_raises
 
 # import os
 # import glob
@@ -35,6 +36,14 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.dummy import DummyClassifier
 from vecstack import StackingTransformer
+
+from sklearn.multiclass import OneVsRestClassifier
+
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import StackingClassifier
+from sklearn.pipeline import Pipeline
+
 
 n_classes = 3
 n_folds = 5
@@ -82,7 +91,7 @@ def roc_auc_score_universal(y_true, y_pred):
     y_pred - 2d numpy array
         Predicted probabilities for each class
     """
-    ohe = OneHotEncoder(sparse=False)
+    ohe = OneHotEncoder(sparse_output=False)
     y_true = ohe.fit_transform(y_true.reshape(-1, 1))
     auc_score = roc_auc_score(y_true, y_pred)
     return auc_score
@@ -98,7 +107,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
 
     def test_variant_B_labels(self):
         # reference
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -106,7 +115,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -135,25 +144,25 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             model = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1 = st.mode(S_test_temp, axis=1)[0]
+        S_test_1 = st.mode(S_test_temp, axis=1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='A', random_state=0,
@@ -180,7 +189,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
 
     def test_variant_B_proba(self):
         # reference
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict_proba')
@@ -188,7 +197,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = model.predict_proba(X_test)
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -219,27 +228,27 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = np.zeros((X_test.shape[0], n_classes))
         S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict_proba')
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='A', random_state=0,
@@ -276,21 +285,21 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         # !!! Important. Here we pass CV-generator ``cv=kf`` not number of folds
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=kf, n_jobs=1, verbose=0,
                                       method='predict_proba')
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=True,
                                     variant='A', random_state=0,
@@ -320,14 +329,14 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_default_metric_and_scores_labels(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         scorer = make_scorer(accuracy_score)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -358,14 +367,14 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_custom_metric_and_scores_labels(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         scorer = make_scorer(zero_one_loss)
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -397,14 +406,14 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_default_metric_and_scores_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
-        scorer = make_scorer(log_loss, needs_proba=True)
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
+        scorer = make_scorer(log_loss, response_method='predict_proba')
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -436,14 +445,14 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_custom_metric_and_scores_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
-        scorer = make_scorer(roc_auc_score_universal, needs_proba=True)
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
+        scorer = make_scorer(roc_auc_score_universal, response_method='predict_proba')
         scores_1 = cross_val_score(model, X_train, y=y_train,
                                    cv=n_folds, scoring=scorer,
                                    n_jobs=1, verbose=0)
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -476,7 +485,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
 
     def test_variant_B_2_estimators_labels(self):
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                         cv=n_folds, n_jobs=1, verbose=0,
                                         method='predict').reshape(-1, 1)
@@ -494,7 +503,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -521,7 +530,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
 
     def test_variant_B_2_estimators_proba(self):
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                         cv=n_folds, n_jobs=1, verbose=0,
                                         method='predict_proba')
@@ -539,7 +548,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -570,19 +579,19 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         # Estimator 1
         S_test_temp_e1 = np.zeros((X_test.shape[0], n_folds))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             model = model.fit(X_tr, y_tr)
             S_test_temp_e1[:, fold_counter] = model.predict(X_test)
-        S_test_1_e1 = st.mode(S_test_temp_e1, axis=1)[0]
+        S_test_1_e1 = st.mode(S_test_temp_e1, axis=1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -590,7 +599,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         # Estimator 2
         S_test_temp_e2 = np.zeros((X_test.shape[0], n_folds))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -600,7 +609,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
             model = GaussianNB()
             model = model.fit(X_tr, y_tr)
             S_test_temp_e2[:, fold_counter] = model.predict(X_test)
-        S_test_1_e2 = st.mode(S_test_temp_e2, axis=1)[0]
+        S_test_1_e2 = st.mode(S_test_temp_e2, axis=1, keepdims=True)[0]
     
         model = GaussianNB()
         S_train_1_e2 = cross_val_predict(model, X_train, y=y_train,
@@ -611,7 +620,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]
         
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -643,21 +652,21 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1_e1 = np.zeros((X_test.shape[0], n_classes))
         S_test_temp_e1 = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             # X_te = X_train[te_index]
             # y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             model = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp_e1[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1_e1[:, class_id] = np.mean(S_test_temp_e1[:, class_id::n_classes], axis=1)
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_e1 = cross_val_predict(model, X_train, y=y_train,
                                          cv=n_folds, n_jobs=1, verbose=0,
                                          method='predict_proba')
@@ -666,7 +675,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1_e2 = np.zeros((X_test.shape[0], n_classes))
         S_test_temp_e2 = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = StratifiedKFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -689,7 +698,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         S_test_1 = np.c_[S_test_1_e1, S_test_1_e2]                              
 
         # fit then transform
-        estimators = [('logit', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')),
+        estimators = [('logit', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))),
                       ('bayes', GaussianNB())]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
@@ -783,7 +792,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_variant_B_verbose(self):
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict').reshape(-1, 1)
@@ -792,7 +801,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         
         # verbose=0
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('lr', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -808,7 +817,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         
         # verbose=1
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('lr', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -824,7 +833,7 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         
         # verbose=2
         # fit then transform
-        estimators = [('lr', LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'))]
+        estimators = [('lr', OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')))]
         stack = StackingTransformer(estimators, regression=False,
                                     n_folds=n_folds, shuffle=False,
                                     variant='B', random_state=0,
@@ -857,6 +866,60 @@ class TestSklearnClassificationMulticlass(unittest.TestCase):
         assert_array_equal(S_train_1, S_train_7)
         assert_array_equal(S_test_1, S_test_7)
         
+
+    #--------------------------------------------------------------------------
+    # Added 20250921
+    # Compare with StackingClassifier
+    #--------------------------------------------------------------------------
+
+    def test_compare_with_stackinglassifier_from_sklearn(self):
+    
+        estimators = [    
+            ('et', ExtraTreesClassifier(n_estimators=100, random_state=0)),
+            ('rf', RandomForestClassifier(n_estimators=100, random_state=0))]        
+        final_estimator = LogisticRegression(random_state=0)
+                
+        # vecstack.StackingTransformer        
+        stack = StackingTransformer(estimators=estimators, 
+                                    regression=False, 
+                                    variant='B',
+                                    n_folds=5,
+                                    shuffle=False, 
+                                    stratified=True,
+                                    needs_proba=True)
+        
+        steps = [('stack', stack),
+                 ('final_estimator', final_estimator)]        
+        pipe = Pipeline(steps)        
+        y_pred_vecstack = pipe.fit(X_train, y_train).predict_proba(X_test)
+                
+        # sklearn.ensemble.StackingClassifier        
+        clf = StackingClassifier(estimators=estimators,
+                                 final_estimator=final_estimator,
+                                 stack_method='predict_proba')
+        y_pred_sklearn = clf.fit(X_train, y_train).predict_proba(X_test)
+        
+        assert_array_equal(y_pred_vecstack, y_pred_sklearn)
+        
+        # Compare transformation
+        
+        # Transformation for test set is equal
+        S_test_vecstack = stack.transform(X_test)
+        S_test_sklearn = clf.transform(X_test)        
+        assert_array_equal(S_test_vecstack, S_test_sklearn)
+        
+        # Transformation for train set set is different because StackingClassifier does not use CV procedure
+        S_train_vecstack = stack.transform(X_train)
+        S_train_sklearn = clf.transform(X_train)
+        assert_raises(AssertionError, assert_array_equal, S_train_vecstack, S_train_sklearn)
+        
+        # Instead of CV procedure it just uses models trained on the whole train set
+        et = ExtraTreesClassifier(random_state=0, n_estimators=100)
+        rf = RandomForestClassifier(random_state=0, n_estimators=100)
+        y_pred_et = et.fit(X_train, y_train).predict_proba(X_train)
+        y_pred_rf = rf.fit(X_train, y_train).predict_proba(X_train)
+        assert_array_equal(S_train_sklearn, np.hstack([y_pred_et, y_pred_rf]))
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 

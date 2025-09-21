@@ -31,25 +31,38 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
-from sklearn.datasets import load_boston
+# from sklearn.datasets import load_boston
+from sklearn.datasets import fetch_openml
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import make_scorer
+from sklearn.metrics import log_loss
 from sklearn.dummy import DummyRegressor
+from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import Ridge
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.utils.estimator_checks import check_estimator
-from sklearn.externals import joblib
+from sklearn.utils.multiclass import type_of_target
+# from sklearn.externals import joblib
+import joblib
 from sklearn.pipeline import Pipeline
 from sklearn.pipeline import FeatureUnion
 from vecstack import StackingTransformer
 
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import StackingRegressor
+
 n_folds = 5
 temp_dir = 'tmpdw35lg54ms80eb42'
 
-boston = load_boston()
-X, y = boston.data, boston.target
+# boston = load_boston()
+boston = fetch_openml(name='boston', version=1, as_frame=False, parser='auto')
+# X, y = boston.data, boston.target
+X, y = boston.data.astype(float), boston.target.astype(float)
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
 
@@ -73,7 +86,49 @@ y_test = y[ind_test]
 
 
 # -----------------------------------------------------------------------------
-# Scikit-learn INcompatible estimator 
+# -----------------------------------------------------------------------------
+
+def log_loss_mod(y_true, y_pred):
+    """
+    When data is very small, cv split may lead to asituation where
+    `y_true` does not have all labels seen during training.
+    Original `log_loss` function raises in this case.
+
+    y_true = np.array([0, 1, 1])
+    y_pred = np.array([[0.3, 0.3, 0.4],
+                       [0.3, 0.3, 0.4],
+                       [0.3, 0.3, 0.4]])
+    log_loss(y_true, y_pred)  # ValueError
+    log_loss_mod(y_true, y_pred)  # OK
+    """
+    try:
+        return log_loss(y_true, y_pred)
+    except Exception as e:
+        shape = y_pred.shape
+        if len(shape) == 2:
+            try:
+                return log_loss(y_true, y_pred, labels=range(shape[1]))
+            except Exception as e:
+                return 0.0
+        else:
+            return 0.0
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+class DummyClassifierNumeric(DummyClassifier):
+    """
+    This class is used as a default classification estimator when the `estimators` parameter is None.
+    The reason for subclassing is that the original `DummyClassifier` allows for string targets,
+    while `StackingTransformer` does not. Eventually `StackingTransformer` object created with
+    original `DummyClassifier` does not pass validation with `check_estimator` function.
+    """
+    def fit(self, X, y, sample_weight=None):
+        type_of_target(y, raise_unknown=True)
+        return super().fit(X, y, sample_weight=sample_weight)
+
+# -----------------------------------------------------------------------------
+# Scikit-learn INcompatible estimator
 # -----------------------------------------------------------------------------
 
 class IncompatibleEstimator:
@@ -132,10 +187,59 @@ class TestSklearnRegression(unittest.TestCase):
     # -------------------------------------------------------------------------
     # Main scikit-learn compatibility test
     # -------------------------------------------------------------------------
-    
+
     def test_sklearn_compatibility(self):
-        check_estimator(StackingTransformer)
-    
+        # Check with actual `estimators`
+        # Ignored checks
+        expected_failed_checks = {
+            # Training time
+            'check_sample_weight_equivalence_on_dense_data': 'CV scheme is used. Changing the number of samples affects the CV split.',
+            'check_sample_weight_equivalence_on_sparse_data': 'CV scheme is used. Changing the number of samples affects the CV split.',
+            # Prediction time
+            'check_methods_sample_order_invariance': 'CV scheme is used. Changing the order of samples affects the CV split.',
+            'check_methods_subset_invariance': 'CV scheme is used. Changing the number of samples affects the CV split.',
+        }
+
+        # One estimator
+        # Regression
+        estimators = [('lr', LinearRegression())]
+        check_estimator(StackingTransformer(estimators=estimators, regression=True), expected_failed_checks=expected_failed_checks)
+        # Classifiaction (class labels)
+        estimators = [('logit', LogisticRegression())]
+        check_estimator(StackingTransformer(estimators=estimators, regression=False), expected_failed_checks=expected_failed_checks)
+        # Classifiaction (proba)
+        estimators = [('logit', LogisticRegression())]
+        check_estimator(StackingTransformer(estimators=estimators, regression=False, needs_proba=True, metric=log_loss_mod), expected_failed_checks=expected_failed_checks)
+
+        # Two estimators
+        # Regression
+        estimators = [
+            ('lr', LinearRegression()),
+            ('ridge', Ridge()),
+        ]
+        check_estimator(StackingTransformer(estimators=estimators, regression=True), expected_failed_checks=expected_failed_checks)
+        # Classifiaction (class labels)
+        estimators = [
+            ('logit', LogisticRegression()),
+            ('svc', DecisionTreeClassifier(random_state=0, max_depth=2)),
+        ]
+        check_estimator(StackingTransformer(estimators=estimators, regression=False), expected_failed_checks=expected_failed_checks)
+        # Classifiaction (proba)
+        estimators = [
+            ('logit', LogisticRegression()),
+            ('svc', DecisionTreeClassifier(random_state=0, max_depth=2)),
+        ]
+        check_estimator(StackingTransformer(estimators=estimators, regression=False, needs_proba=True, metric=log_loss_mod), expected_failed_checks=expected_failed_checks)
+
+        # Check with `estimators=None`.
+        # In this case we don't need `expected_failed_checks`,
+        # because Dummy estimators are used by default and they predict all constants regardless the split
+        # Regression
+        check_estimator(StackingTransformer())
+        # Classifiaction
+        estimators = [('dummyclf', DummyClassifierNumeric(strategy='constant', constant=1))]
+        check_estimator(StackingTransformer(estimators=estimators, regression=False))
+
     # -------------------------------------------------------------------------
     # Test returned arrays in variant B
     # -------------------------------------------------------------------------
@@ -178,7 +282,7 @@ class TestSklearnRegression(unittest.TestCase):
     def test_variant_A(self):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -228,7 +332,7 @@ class TestSklearnRegression(unittest.TestCase):
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict', 
-                                      fit_params={'sample_weight': sw}).reshape(-1, 1)
+                                      params={'sample_weight': sw}).reshape(-1, 1)
         model = model.fit(X_train, y_train, sample_weight=sw)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
         
@@ -266,7 +370,7 @@ class TestSklearnRegression(unittest.TestCase):
         S_train_1 = cross_val_predict(model, X_train, y=y_train,
                                       cv=n_folds, n_jobs=1, verbose=0,
                                       method='predict', 
-                                      fit_params={'sample_weight': sw}).reshape(-1, 1)
+                                      params={'sample_weight': sw}).reshape(-1, 1)
         model = model.fit(X_train, y_train, sample_weight=sw)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
         
@@ -415,7 +519,7 @@ class TestSklearnRegression(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_variant_A_verbose(self):
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -770,7 +874,7 @@ class TestSklearnRegression(unittest.TestCase):
         
         # Model a
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -789,7 +893,7 @@ class TestSklearnRegression(unittest.TestCase):
             
         # Model b
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
-        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -1306,6 +1410,149 @@ class TestSklearnRegression(unittest.TestCase):
         # Here we expect that final predictions are equal
         assert_array_equal(y_pred_1, y_pred_3)
         
+
+    # -------------------------------------------------------------------------
+    # Added 20250921
+    # Test Pipeline and ability to reset the whole `estimators` collection
+    # -------------------------------------------------------------------------
+    def test_pipeline_2_reset_whole_estimators_collection(self):
+        # reference
+        model = LinearRegression(fit_intercept=True)
+        S_train_1_lr = cross_val_predict(model, X_train, y=y_train,
+                                         cv=n_folds, n_jobs=1, verbose=0,
+                                         method='predict').reshape(-1, 1)
+        model = model.fit(X_train, y_train)
+        S_test_1_lr = model.predict(X_test).reshape(-1, 1)
+        
+        model = DecisionTreeRegressor(random_state=0, max_depth=2)
+        S_train_1_ridge = cross_val_predict(model, X_train, y=y_train,
+                                            cv=n_folds, n_jobs=1, verbose=0,
+                                            method='predict').reshape(-1, 1)
+        model = model.fit(X_train, y_train)
+        S_test_1_ridge = model.predict(X_test).reshape(-1, 1)
+        
+        S_train_1 = np.c_[S_train_1_lr, S_train_1_ridge]
+        S_test_1 = np.c_[S_test_1_lr, S_test_1_ridge]
+        
+        model = Ridge(random_state=0, alpha=2)
+        model = model.fit(S_train_1, y_train)
+        y_pred_1 = model.predict(S_test_1)
+
+        # We intentionally set different parameter values to reset them
+        # later using ``set_params`` method
+        # We have 5 parameters which differs from reference:
+        # ``fit_intercept``, ``max_depth``, ``variant``, and ``alpha``
+        # and the whole ``estimators`` collection
+        estimators = [('ridge_1', Ridge(alpha=1.0, fit_intercept=True, random_state=0)),
+                      ('ridge_2', Ridge(alpha=0.1, fit_intercept=False, random_state=1))]        
+        stack = StackingTransformer(estimators, regression=True,
+                                    n_folds=n_folds, shuffle=False,
+                                    variant='A', random_state=0,
+                                    verbose=0)
+        ridge = Ridge(random_state=0, alpha=7)
+        
+        steps = [('stack', stack),
+                 ('ridge', ridge)]
+                 
+        pipe = Pipeline(steps)
+        
+        pipe = pipe.fit(X_train, y_train)
+        y_pred_2 = pipe.predict(X_test)
+        
+        # Here we expect that final predictions are different 
+        # because we've set different parameters
+        assert_raises(AssertionError, assert_array_equal, y_pred_1, y_pred_2)
+        
+        # Reset original parameters used in reference
+        # First we replace the whole `estimators` collection with correct estimators, but incorrect params
+        # and then reset params of each estimator within the collection
+        estimators = [('lr', LinearRegression(fit_intercept=False)),
+                      ('tree', DecisionTreeRegressor(random_state=0, max_depth=4))]
+        # It does not matter where `stack__estimators` will be placed 
+        # i.e. first or last in the list of parameters which we need to reset
+        pipe = pipe.set_params(stack__estimators=estimators,  # replace the whole `estimators` collection
+                               stack__lr__fit_intercept=True,
+                               stack__tree__max_depth=2,
+                               stack__variant='B',
+                               ridge__alpha=2)
+                               
+        pipe = pipe.fit(X_train, y_train)
+        y_pred_3 = pipe.predict(X_test)
+        
+        # Here we expect that final predictions are equal
+        assert_array_equal(y_pred_1, y_pred_3)
+
+
+    # -------------------------------------------------------------------------
+    # Added 20250921
+    # Test Pipeline and ability to reset an individual eatimator within the `estimators` collection
+    # -------------------------------------------------------------------------
+    def test_pipeline_3_reset_individual_estimator_within_collection(self):
+        # reference
+        model = LinearRegression(fit_intercept=True)
+        S_train_1_lr = cross_val_predict(model, X_train, y=y_train,
+                                         cv=n_folds, n_jobs=1, verbose=0,
+                                         method='predict').reshape(-1, 1)
+        model = model.fit(X_train, y_train)
+        S_test_1_lr = model.predict(X_test).reshape(-1, 1)
+        
+        model = DecisionTreeRegressor(random_state=0, max_depth=2)
+        S_train_1_ridge = cross_val_predict(model, X_train, y=y_train,
+                                            cv=n_folds, n_jobs=1, verbose=0,
+                                            method='predict').reshape(-1, 1)
+        model = model.fit(X_train, y_train)
+        S_test_1_ridge = model.predict(X_test).reshape(-1, 1)
+        
+        S_train_1 = np.c_[S_train_1_lr, S_train_1_ridge]
+        S_test_1 = np.c_[S_test_1_lr, S_test_1_ridge]
+        
+        model = Ridge(random_state=0, alpha=2)
+        model = model.fit(S_train_1, y_train)
+        y_pred_1 = model.predict(S_test_1)
+
+        # We intentionally set different parameter values to reset them
+        # later using ``set_params`` method
+        # We have 5 parameters which differs from reference:
+        # ``fit_intercept``, ``max_depth``, ``variant``, and ``alpha``
+        # and the whole ``estimators`` collection
+        estimators = [('ridge_1', Ridge(alpha=1.0, fit_intercept=True, random_state=0)),
+                      ('tree', DecisionTreeRegressor(random_state=0, max_depth=4))]        
+        stack = StackingTransformer(estimators, regression=True,
+                                    n_folds=n_folds, shuffle=False,
+                                    variant='A', random_state=0,
+                                    verbose=0)
+        ridge = Ridge(random_state=0, alpha=7)
+        
+        steps = [('stack', stack),
+                 ('ridge', ridge)]
+                 
+        pipe = Pipeline(steps)
+        
+        pipe = pipe.fit(X_train, y_train)
+        y_pred_2 = pipe.predict(X_test)
+        
+        # Here we expect that final predictions are different 
+        # because we've set different parameters
+        assert_raises(AssertionError, assert_array_equal, y_pred_1, y_pred_2)
+        
+        # Reset original parameters used in reference
+        # First we replace individual estimator whithin the collection with correct estimator, but incorrect params
+        # we retain the name "ridge_1" (instead of "lr") bcause it is arbitrary and does not matter,
+        # and then reset params of each estimator within the collection
+        # It does not matter where `stack__estimators` will be placed 
+        # i.e. first or last in the list of parameters which we need to reset
+        pipe = pipe.set_params(stack__ridge_1=LinearRegression(fit_intercept=False),  # replace individual estimator within the collection
+                               stack__ridge_1__fit_intercept=True,
+                               stack__tree__max_depth=2,
+                               stack__variant='B',
+                               ridge__alpha=2)
+                               
+        pipe = pipe.fit(X_train, y_train)
+        y_pred_3 = pipe.predict(X_test)
+        
+        # Here we expect that final predictions are equal
+        assert_array_equal(y_pred_1, y_pred_3)
+
     # -------------------------------------------------------------------------
     # Test FeatureUnion and ability to set parameters of nested estimators
     # -------------------------------------------------------------------------
@@ -1707,7 +1954,7 @@ class TestSklearnRegression(unittest.TestCase):
         Test: 10 examples
         """
         S_test_temp = np.zeros((X_test[:10].shape[0], n_folds))
-        kf = KFold(n_splits=n_folds, shuffle=False, random_state=0)
+        kf = KFold(n_splits=n_folds, shuffle=False, random_state=None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train[:20], y_train[:20])):
             # Split data and target
             X_tr = X_train[:20][tr_index]
@@ -1745,6 +1992,55 @@ class TestSklearnRegression(unittest.TestCase):
 
         assert_array_equal(S_train_1, S_train_3)
         assert_array_equal(S_test_1, S_test_3)
+
+    # -------------------------------------------------------------------------
+    # Added 20250921
+    # Compare with StackingRegressor
+    # -------------------------------------------------------------------------
+    def test_compare_with_stackingregressor_from_sklearn(self):
+    
+        estimators = [    
+            ('et', ExtraTreesRegressor(n_estimators=100, random_state=0)),
+            ('rf', RandomForestRegressor(n_estimators=100, random_state=0))]        
+        final_estimator = LinearRegression()
+                
+        # vecstack.StackingTransformer        
+        stack = StackingTransformer(estimators=estimators, 
+                                    regression=True, 
+                                    variant='B',
+                                    n_folds=5,
+                                    shuffle=False)
+        
+        steps = [('stack', stack),
+                 ('final_estimator', final_estimator)]        
+        pipe = Pipeline(steps)        
+        y_pred_vecstack = pipe.fit(X_train, y_train).predict(X_test)
+                
+        # sklearn.ensemble.StackingClassifier        
+        clf = StackingRegressor(estimators=estimators,
+                                 final_estimator=final_estimator)
+        y_pred_sklearn = clf.fit(X_train, y_train).predict(X_test)
+        
+        assert_array_equal(y_pred_vecstack, y_pred_sklearn)
+        
+        # Compare transformation
+        
+        # Transformation for test set is equal
+        S_test_vecstack = stack.transform(X_test)
+        S_test_sklearn = clf.transform(X_test)        
+        assert_array_equal(S_test_vecstack, S_test_sklearn)
+        
+        # Transformation for train set set is different because StackingClassifier does not use CV procedure
+        S_train_vecstack = stack.transform(X_train)
+        S_train_sklearn = clf.transform(X_train)
+        assert_raises(AssertionError, assert_array_equal, S_train_vecstack, S_train_sklearn)
+        
+        # Instead of CV procedure it just uses models trained on the whole train set
+        et = ExtraTreesRegressor(random_state=0, n_estimators=100)
+        rf = RandomForestRegressor(random_state=0, n_estimators=100)
+        y_pred_et = et.fit(X_train, y_train).predict(X_train)
+        y_pred_rf = rf.fit(X_train, y_train).predict(X_train)
+        assert_array_equal(S_train_sklearn, np.hstack([y_pred_et.reshape(-1, 1), y_pred_rf.reshape(-1, 1)]))
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------

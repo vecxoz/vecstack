@@ -6,7 +6,7 @@ Find out how to use:
 
 MIT License
 
-Copyright (c) 2016-2018 Igor Ivanov
+Copyright (c) 2016-2025 Igor Ivanov
 Email: vecxoz@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -254,6 +254,7 @@ def stacking(models, X_train, y_train, X_test,
         
     random_state : int, default 0
         Random seed
+        Ignored if shuffle=False
         
     verbose : int, default 0
         Level of verbosity.
@@ -302,7 +303,7 @@ def stacking(models, X_train, y_train, X_test,
     
     Regression
     ----------
-    from sklearn.datasets import load_boston
+    from sklearn.datasets import fetch_california_housing
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_absolute_error
     from sklearn.ensemble import ExtraTreesRegressor
@@ -311,35 +312,36 @@ def stacking(models, X_train, y_train, X_test,
     from vecstack import stacking
 
     # Load demo data
-    boston = load_boston()
-    X, y = boston.data, boston.target
+    X, y = fetch_california_housing(return_X_y=True)
 
     # Make train/test split
     # As usual in machine learning task we have X_train, y_train, and X_test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, 
-        test_size = 0.2, random_state = 0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                        test_size=0.2,
+                                                        random_state=0)
 
-    # Caution! All models and parameter values are just 
+    # Caution! All models and parameter values are just
     # demonstrational and shouldn't be considered as recommended.
     # Initialize 1-st level models.
     models = [
-        ExtraTreesRegressor(random_state = 0, n_jobs = -1, 
-            n_estimators = 100, max_depth = 3),
+        ExtraTreesRegressor(random_state=0, n_jobs=-1,
+                            n_estimators=100, max_depth=3),
         
-        RandomForestRegressor(random_state = 0, n_jobs = -1, 
-            n_estimators = 100, max_depth = 3),
+        RandomForestRegressor(random_state=0, n_jobs=-1,
+                              n_estimators=100, max_depth=3),
         
-        XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-            n_estimators = 100, max_depth = 3)]
+        XGBRegressor(random_state=0, n_jobs=-1, learning_rate=0.1,
+                     n_estimators=100, max_depth=3)]
     
     # Compute stacking features
-    S_train, S_test = stacking(models, X_train, y_train, X_test, 
-        regression = True, metric = mean_absolute_error, n_folds = 4, 
-        shuffle = True, random_state = 0, verbose = 2)
+    S_train, S_test = stacking(models, X_train, y_train, X_test,
+                               regression=True, metric=mean_absolute_error,
+                               n_folds=4, shuffle=True,
+                               random_state=0, verbose=2)
 
     # Initialize 2-nd level model
-    model = XGBRegressor(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-        n_estimators = 100, max_depth = 3)
+    model = XGBRegressor(random_state=0, n_jobs=-1, learning_rate=0.1,
+                         n_estimators=100, max_depth=3)
     
     # Fit 2-nd level model
     model = model.fit(S_train, y_train)
@@ -362,35 +364,36 @@ def stacking(models, X_train, y_train, X_test,
     from vecstack import stacking
 
     # Load demo data
-    iris = load_iris()
-    X, y = iris.data, iris.target
+    X, y = load_iris(return_X_y=True)
 
     # Make train/test split
     # As usual in machine learning task we have X_train, y_train, and X_test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, 
-        test_size = 0.2, random_state = 0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                        test_size=0.2,
+                                                        random_state=0)
 
-    # Caution! All models and parameter values are just 
+    # Caution! All models and parameter values are just
     # demonstrational and shouldn't be considered as recommended.
     # Initialize 1-st level models.
     models = [
-        ExtraTreesClassifier(random_state = 0, n_jobs = -1, 
-            n_estimators = 100, max_depth = 3),
+        ExtraTreesClassifier(random_state=0, n_jobs=-1,
+                             n_estimators=100, max_depth=3),
         
-        RandomForestClassifier(random_state = 0, n_jobs = -1, 
-            n_estimators = 100, max_depth = 3),
+        RandomForestClassifier(random_state=0, n_jobs=-1,
+                               n_estimators=100, max_depth=3),
         
-        XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-            n_estimators = 100, max_depth = 3)]
+        XGBClassifier(seed=0, n_jobs=-1, learning_rate=0.1,
+                      n_estimators=100, max_depth=3)]
     
     # Compute stacking features
-    S_train, S_test = stacking(models, X_train, y_train, X_test, 
-        regression = False, metric = accuracy_score, n_folds = 4, 
-        stratified = True, shuffle = True, random_state = 0, verbose = 2)
+    S_train, S_test = stacking(models, X_train, y_train, X_test,
+                               regression=False, metric=accuracy_score,
+                               n_folds=4, stratified=True, shuffle=True,
+                               random_state=0, verbose=2)
 
     # Initialize 2-nd level model
-    model = XGBClassifier(seed = 0, n_jobs = -1, learning_rate = 0.1, 
-        n_estimators = 100, max_depth = 3)
+    model = XGBClassifier(seed=0, n_jobs=-1, learning_rate=0.1,
+                          n_estimators=100, max_depth=3)
     
     # Fit 2-nd level model
     model = model.fit(S_train, y_train)
@@ -415,8 +418,8 @@ def stacking(models, X_train, y_train, X_test,
     X_train, y_train = check_X_y(X_train,
                                  y_train,
                                  accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
-                                 force_all_finite=False, # allow nan and inf because 
-                                                         # some models (xgboost) can handle
+                                 ensure_all_finite=False, # allow nan and inf because
+                                                          # some models (xgboost) can handle
                                  allow_nd=True,
                                  multi_output=False) # do not allow several columns in y_train
                                  
@@ -424,8 +427,8 @@ def stacking(models, X_train, y_train, X_test,
         X_test = check_array(X_test,
                              accept_sparse=['csr'], # allow csr and cast all other sparse types to csr
                              allow_nd=True,
-                             force_all_finite=False) # allow nan and inf because 
-                                                     # some models (xgboost) can handle
+                             ensure_all_finite=False) # allow nan and inf because
+                                                      # some models (xgboost) can handle
     if sample_weight is not None:
         sample_weight = np.array(sample_weight).ravel()
     # <regression>
@@ -449,6 +452,10 @@ def stacking(models, X_train, y_train, X_test,
     stratified = bool(stratified)
     # <shuffle>
     shuffle = bool(shuffle)
+    # <random_state>
+    # To comply with sklearn requirement
+    if not shuffle:
+        random_state = None
     # <verbose>
     if verbose not in [0, 1, 2]:
         raise ValueError('Parameter <verbose> must be 0, 1, or 2')
@@ -669,7 +676,10 @@ def stacking(models, X_train, y_train, X_test,
             log_full_path = os.path.join(save_dir, log_file_name)
             
             # Save OOF
-            np.save(full_path, np.array([S_train, S_test]))
+            array_to_save = np.empty(2, dtype='object')
+            array_to_save[0] = S_train
+            array_to_save[1] = S_test
+            np.save(full_path, array_to_save)
             
             # Save log
             log_str = 'vecstack log '

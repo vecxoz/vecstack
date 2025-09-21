@@ -8,7 +8,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
 '''
 
 setup(name='vecstack',
-      version='0.4.0',
+      version='0.5.0',
       description='Python package for stacking (machine learning technique)',
       long_description=long_desc,
       classifiers=[
@@ -19,9 +19,10 @@ setup(name='vecstack',
           'Operating System :: Unix',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
+          'Programming Language :: Python :: 3.11',
+          'Programming Language :: Python :: 3.12',
           'Topic :: Scientific/Engineering',
           'Topic :: Scientific/Engineering :: Artificial Intelligence',
           'Topic :: Scientific/Engineering :: Information Analysis',
@@ -41,6 +42,12 @@ setup(name='vecstack',
           'scipy',
           'scikit-learn>=0.18'
       ],
-      test_suite='nose.collector',
-      tests_require=['nose'],
+      extras_require={
+          'test': [
+              'pytest',
+              'pytest-cov',
+              'pandas',
+              'pyarrow'
+          ]
+      },
       zip_safe=False)
