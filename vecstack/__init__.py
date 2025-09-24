@@ -8,7 +8,7 @@ Find out how to use:
 
 MIT License
 
-Copyright (c) 2016-2018 Igor Ivanov
+Copyright (c) 2016-2025 Igor Ivanov
 Email: vecxoz@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,7 +38,7 @@ from .coresk import StackingTransformer
 
 __author__ = 'Igor Ivanov > kaggle.com/vecxoz'
 __license__ = 'MIT'
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 __all__ = ['stacking', 'StackingTransformer']
 

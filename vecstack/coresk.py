@@ -6,7 +6,7 @@ Find out how to use:
 
 MIT License
 
-Copyright (c) 2016-2018 Igor Ivanov
+Copyright (c) 2016-2025 Igor Ivanov
 Email: vecxoz@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,6 +38,7 @@ from __future__ import division
 # -----------------------------------------------------------------------------
 
 import warnings
+from contextlib import suppress
 import numpy as np
 import scipy.stats as st
 from sklearn.base import BaseEstimator
@@ -49,6 +50,7 @@ from sklearn.utils.validation import check_X_y
 from sklearn.utils.validation import check_array
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.validation import has_fit_parameter
+from sklearn.utils.validation import validate_data
 from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import mean_absolute_error
@@ -60,7 +62,7 @@ from sklearn.metrics import mean_squared_error
 # -----------------------------------------------------------------------------
 
 
-class StackingTransformer(BaseEstimator, TransformerMixin):
+class StackingTransformer(TransformerMixin, BaseEstimator):
     """StackingTransformer. Scikit-learn compatible API for stacking.
 
     Parameters
@@ -149,6 +151,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
     random_state : int, default 0
         Random seed used to initiate fold split.
         Same seed and correspondingly same split is used for all estimators.
+        Ignored if ``shuffle=False``
 
     verbose : int, default 0
         Level of verbosity.
@@ -200,7 +203,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from sklearn.datasets import load_boston
+    >>> from sklearn.datasets import fetch_california_housing
     >>> from sklearn.model_selection import train_test_split
     >>> from sklearn.metrics import mean_absolute_error
     >>> from sklearn.ensemble import ExtraTreesRegressor, RandomForestRegressor
@@ -208,8 +211,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
     >>> from vecstack import StackingTransformer
     >>>
     >>> # Load demo data
-    >>> boston = load_boston()
-    >>> X, y = boston.data, boston.target
+    >>> X, y = fetch_california_housing(return_X_y=True)
     >>>
     >>> # Make train/test split
     >>> X_train, X_test, y_train, y_test = train_test_split(X, y,
@@ -282,6 +284,17 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
+    def __sklearn_tags__(self):
+        tags = super().__sklearn_tags__()
+        tags.estimator_type = 'transformer'
+        tags.transformer_tags.preserves_dtype = []
+        tags.target_tags.required = True
+        tags.input_tags.sparse = True
+        return tags
+
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
     def fit(self, X, y, sample_weight=None):
         """Fit all base estimators.
 
@@ -308,19 +321,29 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         # ---------------------------------------------------------------------
         # Check input data
         # ---------------------------------------------------------------------
+        # Check data and set `self.n_features_in_` and `self.feature_names_in_`
+        X, y = validate_data(self, X, y,
+                             reset=True,  # default: True, if True will set `self.n_features_in_` and `self.feature_names_in_`
+                             validate_separately=False,  # default: False, if False will use `check_X_y`
+                             skip_check_array=False,  # default: False, if False will NOT skip checks
+                             accept_sparse=['csr'],
+                             ensure_all_finite=True,
+                             multi_output=False)
+
+        # Legacy check included in `validate_data`
         # Check X and y
-        # ``check_estimator`` does not allow ``force_all_finite=False``
-        X, y = check_X_y(X, y,
-                         accept_sparse=['csr'],  # allow csr, cast all others to csr
-                         force_all_finite=True,  # do not allow  nan and inf
-                         multi_output=False)  # allow only one column in y_train
+        # ``check_estimator`` does not allow ``ensure_all_finite=False``
+        # X, y = check_X_y(X, y,
+        #                  accept_sparse=['csr'],  # allow csr, cast all others to csr
+        #                  ensure_all_finite=True,  # do not allow  nan and inf
+        #                  multi_output=False)  # allow only one column in y_train
 
         # Check X and sample_weight
         # X is alredy checked, but we need it to compare length of sample_weight
         if sample_weight is not None:
             X, sample_weight = check_X_y(X, sample_weight,
                                          accept_sparse=['csr'],
-                                         force_all_finite=True,
+                                         ensure_all_finite=True,
                                          multi_output=False)
 
         # ---------------------------------------------------------------------
@@ -381,6 +404,12 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
                 warn_str += ' ``stratified``'
             warnings.warn(warn_str, UserWarning)
 
+        # To comply with sklearn requirement
+        if not self.shuffle:
+            random_state_internal = None
+        else:
+            random_state_internal = self.random_state
+
         # ---------------------------------------------------------------------
         # Compute attributes (basic properties of data, number of estimators, etc.)
         # ---------------------------------------------------------------------
@@ -432,14 +461,14 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         if not self.regression and self.stratified:
             self.kf_ = StratifiedKFold(n_splits=self.n_folds,
                                        shuffle=self.shuffle,
-                                       random_state=self.random_state)
+                                       random_state=random_state_internal)
             # Save target to be able to create stratified split in ``transform`` method
             # This is more efficient than to save split indices
             self._y_ = y.copy()
         else:
             self.kf_ = KFold(n_splits=self.n_folds,
                              shuffle=self.shuffle,
-                             random_state=self.random_state)
+                             random_state=random_state_internal)
             self._y_ = None
 
         # ---------------------------------------------------------------------
@@ -631,9 +660,18 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         # Check if fitted
         check_is_fitted(self, ['models_A_'])
 
+        # Check data without resetting `self.n_features_in_` and `self.feature_names_in_`
+        X = validate_data(self, X,
+                          reset=False,  # default: True, if True will set `self.n_features_in_` and `self.feature_names_in_`
+                          validate_separately=False,  # default: False, if False will use `check_X_y`
+                          skip_check_array=False,  # default: False, if False will NOT skip checks
+                          accept_sparse=['csr'],
+                          ensure_all_finite=True)  # no need for `multi_output`, because no `y`
+
+        # Legacy check included in `validate_data`
         # Input validation
-        # ``check_estimator`` does not allow ``force_all_finite=False``
-        X = check_array(X, accept_sparse=['csr'], force_all_finite=True)
+        # ``check_estimator`` does not allow ``ensure_all_finite=False``
+        # X = check_array(X, accept_sparse=['csr'], ensure_all_finite=True)
 
         # *********************************************************************
         # Fitted StackingTransformer instance is bound to train set used for fitting.
@@ -717,9 +755,10 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         # Transform any other set
         # *********************************************************************
         else:
+            # Legacy check included in `validate_data`
             # Check n_features
-            if X.shape[1] != self.n_features_:
-                raise ValueError('Inconsistent number of features.')
+            # if X.shape[1] != self.n_features_:
+            #     raise ValueError('Inconsistent number of features.')
 
             # Create empty numpy array for test predictions
             S_test = np.zeros((X.shape[0], self.n_estimators_ * self.n_classes_implicit_))
@@ -945,33 +984,117 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
     # -------------------------------------------------------------------------
 
     def _get_params(self, attr, deep=True):
-        """Gives ability to get parameters of nested estimators
         """
-        out = super(StackingTransformer, self).get_params(deep=False)
+        Gives ability to get parameters of nested estimators
+        """
+        out = super().get_params(deep=deep)
         if not deep:
             return out
+
         estimators = getattr(self, attr)
-        if estimators is None:
+        try:
+            out.update(estimators)
+        except (TypeError, ValueError):
+            # Ignore TypeError for cases where estimators is not a list of
+            # (name, estimator) and ignore ValueError when the list is not
+            # formatted correctly. This is to prevent errors when calling
+            # `set_params`. `BaseEstimator.set_params` calls `get_params` which
+            # can error for invalid values for `estimators`.
             return out
-        out.update(estimators)
+
         for name, estimator in estimators:
-            for key, value in iter(estimator.get_params(deep=True).items()):
-                out['%s__%s' % (name, key)] = value
+            if hasattr(estimator, 'get_params'):
+                for key, value in estimator.get_params(deep=True).items():
+                    out['%s__%s' % (name, key)] = value
         return out
 
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
 
     def get_params(self, deep=True):
-        """Get parameters of StackingTransformer and base estimators.
+        """
+        Get parameters of StackingTransformer and base estimators.
 
         Parameters
         ----------
         deep : boolean
             If False - get parameters of StackingTransformer
             If True - get parameters of StackingTransformer and base estimators
+
+        Returns
+        -------
+        params : dict
+            Parameter and estimator names mapped to their values or parameter
+            names mapped to their values.
         """
         return self._get_params('estimators', deep=deep)
+
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
+    def _set_params(self, attr, **params):
+        """
+        Gives ability to set parameters of nested estimators,
+        and replace individual estimators in the list.
+        """
+        # Ensure strict ordering of parameter setting:
+        # 1. Replace the entire estimators collection
+        if attr in params:
+            setattr(self, attr, params.pop(attr))
+        # 2. Replace individual estimators by name
+        items = getattr(self, attr)
+        if isinstance(items, list) and items:
+            # Get item names used to identify valid names in params
+            # `zip` raises a TypeError when `items` does not contains
+            # elements of length 2
+            with suppress(TypeError):
+                item_names, _ = zip(*items)
+                for name in list(params.keys()):
+                    if '__' not in name and name in item_names:
+                        self._replace_estimator(attr, name, params.pop(name))
+
+        # 3. Individual estimator parameters and other initialisation arguments
+        super().set_params(**params)
+        return self
+
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
+    def _replace_estimator(self, attr, name, new_val):
+        """
+        Replace estimator, assuming `name` is a valid estimator name
+        """
+        new_estimators = list(getattr(self, attr))
+        for i, (estimator_name, _) in enumerate(new_estimators):
+            if estimator_name == name:
+                new_estimators[i] = (name, new_val)
+                break
+        setattr(self, attr, new_estimators)
+
+    # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+
+    def set_params(self, **params):
+        """
+        Set parameters of StackingTransformer and base estimators.
+        Valid parameter keys can be listed with `get_params()`. Note that you
+        can directly set the parameters of the estimators contained in `estimators`.
+
+        Parameters
+        ----------
+        **params : keyword arguments
+            Specific parameters using e.g. `set_params(parameter_name=new_value)`.
+            In addition, to setting the parameters of the estimator,
+            the individual estimator of the estimators can also be set.
+            Dropping individual estimators using 'drop' is not supported.
+
+        Returns
+        -------
+        self : object
+            Estimator instance.
+        """
+        self._set_params('estimators', **params)
+        return self
 
     # -------------------------------------------------------------------------
     # -------------------------------------------------------------------------
@@ -1012,7 +1135,7 @@ class StackingTransformer(BaseEstimator, TransformerMixin):
         # Check if fitted
         check_is_fitted(self, ['models_A_'])
         # Input validation
-        X = check_array(X, accept_sparse=['csr'], force_all_finite=True)
+        X = check_array(X, accept_sparse=['csr'], ensure_all_finite=True)
         return self._check_identity(X)
 
 # -----------------------------------------------------------------------------

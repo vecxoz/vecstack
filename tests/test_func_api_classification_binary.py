@@ -35,6 +35,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from vecstack import stacking
 
+from sklearn.multiclass import OneVsRestClassifier
+
 n_classes = 2
 n_folds = 5
 temp_dir = 'tmpdw35lg54ms80eb42'
@@ -90,6 +92,20 @@ class LogisticRegressionUnrolled(LogisticRegression):
     def predict_proba(self, X):
         return super(LogisticRegressionUnrolled, self).predict_proba(X.reshape(X.shape[0], -1))
 
+
+class OneVsRestClassifierUnrolled(OneVsRestClassifier):
+    """
+    Just to avoid data shape checks
+    """
+    def fit(self, X, y):
+        return super(OneVsRestClassifierUnrolled, self).fit(X.reshape(X.shape[0], -1), y)
+
+    def predict(self, X):
+        return super(OneVsRestClassifierUnrolled, self).predict(X.reshape(X.shape[0], -1))
+
+    def predict_proba(self, X):
+        return super(OneVsRestClassifierUnrolled, self).predict_proba(X.reshape(X.shape[0], -1))
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
@@ -130,13 +146,13 @@ class TestFuncClassificationBinary(unittest.TestCase):
 
     def test_oof_pred_mode(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof_pred', random_state = 0, verbose = 0, stratified = True)
@@ -157,12 +173,12 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
     def test_oof_mode(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         S_test_1 = None
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
@@ -183,12 +199,12 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
     def test_pred_mode(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = None
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict(X_test).reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
             mode = 'pred', random_state = 0, verbose = 0, stratified = True)
@@ -211,23 +227,23 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
         # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1 = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1 = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -250,21 +266,21 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
         # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1 = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1 = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
         S_train_1 = None
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -289,13 +305,13 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
     def test_oof_pred_mode_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict_proba(X_test)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
             mode = 'oof_pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -316,12 +332,12 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
     def test_oof_mode_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         S_test_1 = None
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
             mode = 'oof', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -342,12 +358,12 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
     def test_pred_mode_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = None
         _ = model.fit(X_train, y_train)
         S_test_1 = model.predict_proba(X_test)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True, 
             mode = 'pred', random_state = 0, verbose = 0, needs_proba = True, save_dir=temp_dir)
@@ -371,25 +387,25 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_test_1 = np.zeros((X_test.shape[0], n_classes))
         S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis = 1)
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
@@ -422,14 +438,14 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_test_1 = np.zeros((X_test.shape[0], n_classes))
         S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
@@ -438,7 +454,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
     
         S_train_1 = None
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'pred_bag', random_state = 0, verbose = 0, stratified = True, needs_proba = True)
@@ -472,17 +488,17 @@ class TestFuncClassificationBinary(unittest.TestCase):
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1 = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1 = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         # !!! Important. Here we pass CV-generator not number of folds <cv = kf>
         S_train_1 = cross_val_predict(model, X_train, y = y_train, cv = kf, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = True, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
@@ -509,7 +525,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_oof_mode_metric(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         scorer = make_scorer(accuracy_score)
         scores = cross_val_score(model, X_train, y = y_train, cv = n_folds, 
             scoring = scorer, n_jobs = 1, verbose = 0)
@@ -517,7 +533,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         std_str_1 = '%.8f' % np.std(scores)
         
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True)
@@ -546,15 +562,15 @@ class TestFuncClassificationBinary(unittest.TestCase):
     #---------------------------------------------------------------------------
     def test_oof_mode_metric_proba(self):
 
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
-        scorer = make_scorer(log_loss, needs_proba = True)
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
+        scorer = make_scorer(log_loss, response_method='predict_proba')
         scores = cross_val_score(model, X_train, y = y_train, cv = n_folds, 
             scoring = scorer, n_jobs = 1, verbose = 0)
         mean_str_1 = '%.8f' % np.mean(scores)
         std_str_1 = '%.8f' % np.std(scores)
         
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))]
         S_train, S_test = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, save_dir=temp_dir, 
             mode = 'oof', random_state = 0, verbose = 0, stratified = True, 
@@ -583,7 +599,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
     def test_oof_pred_mode_2_models(self):
 
         # Model a
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
         _ = model.fit(X_train, y_train)
@@ -599,7 +615,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir, 
@@ -624,26 +640,26 @@ class TestFuncClassificationBinary(unittest.TestCase):
         # Model a
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
         # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1_a = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1_a = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
             
         # Model b
         S_test_temp = np.zeros((X_test.shape[0], n_folds))
         # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -653,7 +669,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
             model = GaussianNB()
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test)
-        S_test_1_b = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1_b = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
         model = GaussianNB()
         S_train_1_b = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
@@ -662,7 +678,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
@@ -686,7 +702,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
     def test_oof_pred_mode_proba_2_models(self):
 
         # Model a
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
         _ = model.fit(X_train, y_train)
@@ -702,7 +718,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_train_1 = np.c_[S_train_1_a, S_train_1_b]
         S_test_1 = np.c_[S_test_1_a, S_test_1_b]
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, stratified = True,
@@ -729,21 +745,21 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_test_1_a = np.zeros((X_test.shape[0], n_classes))
         S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
             y_tr = y_train[tr_index]
             X_te = X_train[te_index]
             y_te = y_train[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             col_slice_fold = slice(fold_counter * n_classes, fold_counter * n_classes + n_classes)
             S_test_temp[:, col_slice_fold] = model.predict_proba(X_test)
         for class_id in range(n_classes):
             S_test_1_a[:, class_id] = np.mean(S_test_temp[:, class_id::n_classes], axis = 1)
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1_a = cross_val_predict(model, X_train, y = y_train, cv = n_folds, 
             n_jobs = 1, verbose = 0, method = 'predict_proba')
             
@@ -751,7 +767,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         S_test_1_b = np.zeros((X_test.shape[0], n_classes))
         S_test_temp = np.zeros((X_test.shape[0], n_folds * n_classes))
         # Using StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train, y_train)):
             # Split data and target
             X_tr = X_train[tr_index]
@@ -774,7 +790,7 @@ class TestFuncClassificationBinary(unittest.TestCase):
         
         
 
-        models = [LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr'),
+        models = [OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear')),
                   GaussianNB()]
         S_train_2, S_test_2 = stacking(models, X_train, y_train, X_test, 
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
@@ -809,23 +825,23 @@ class TestFuncClassificationBinary(unittest.TestCase):
         """
         S_test_temp = np.zeros((X_test_4d_unrolled.shape[0], n_folds))
         # Usind StratifiedKFold because by defauld cross_val_predict uses StratifiedKFold
-        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = 0)
+        kf = StratifiedKFold(n_splits = n_folds, shuffle = False, random_state = None)
         for fold_counter, (tr_index, te_index) in enumerate(kf.split(X_train_4d_unrolled, y_train_4d)):
             # Split data and target
             X_tr = X_train_4d_unrolled[tr_index]
             y_tr = y_train_4d[tr_index]
             X_te = X_train_4d_unrolled[te_index]
             y_te = y_train_4d[te_index]
-            model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+            model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
             _ = model.fit(X_tr, y_tr)
             S_test_temp[:, fold_counter] = model.predict(X_test_4d_unrolled)
-        S_test_1 = st.mode(S_test_temp, axis = 1)[0]
+        S_test_1 = st.mode(S_test_temp, axis = 1, keepdims=True)[0]
     
-        model = LogisticRegression(random_state=0, solver='liblinear', multi_class='ovr')
+        model = OneVsRestClassifier(LogisticRegression(random_state=0, solver='liblinear'))
         S_train_1 = cross_val_predict(model, X_train_4d_unrolled, y = y_train_4d, cv = n_folds,
             n_jobs = 1, verbose = 0, method = 'predict').reshape(-1, 1)
 
-        models = [LogisticRegressionUnrolled(random_state=0, solver='liblinear', multi_class='ovr')]
+        models = [OneVsRestClassifierUnrolled(LogisticRegressionUnrolled(random_state=0, solver='liblinear'))]
         S_train_2, S_test_2 = stacking(models, X_train_4d, y_train_4d, X_test_4d,
             regression = False, n_folds = n_folds, shuffle = False, save_dir=temp_dir,
             mode = 'oof_pred_bag', random_state = 0, verbose = 0, stratified = True)
