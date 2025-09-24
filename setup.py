@@ -5,6 +5,7 @@ from setuptools import setup
 long_desc = '''
 Python package for stacking (stacked generalization) featuring lightweight functional API and fully compatible scikit-learn API.
 Convenient way to automate OOF computation, prediction and bagging using any number of models.
+All details, FAQ, and tutorials: https://github.com/vecxoz/vecstack
 '''
 
 setup(name='vecstack',

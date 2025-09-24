@@ -1,6 +1,6 @@
 [![PyPI version](https://img.shields.io/pypi/v/vecstack.svg?colorB=4cc61e)](https://pypi.python.org/pypi/vecstack)
 [![PyPI license](https://img.shields.io/pypi/l/vecstack.svg)](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
-[![Build Status](https://travis-ci.org/vecxoz/vecstack.svg?branch=master)](https://travis-ci.org/vecxoz/vecstack)
+[![Build status](https://github.com/vecxoz/vecstack/actions/workflows/actions.yaml/badge.svg?branch=master)](https://github.com/vecxoz/vecstack/actions)
 [![Coverage Status](https://coveralls.io/repos/github/vecxoz/vecstack/badge.svg?branch=master)](https://coveralls.io/github/vecxoz/vecstack?branch=master)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/vecstack.svg)](https://pypi.python.org/pypi/vecstack/)
 
@@ -137,7 +137,7 @@ S_test = stack.transform(X_test)
 28. [Can I use `(Randomized)GridSearchCV` to tune the whole stacking Pipeline?](https://github.com/vecxoz/vecstack#28-can-i-use-randomizedgridsearchcv-to-tune-the-whole-stacking-pipeline)
 29. [How to define custom metric, especially AUC?](https://github.com/vecxoz/vecstack#29-how-to-define-custom-metric-especially-auc)
 30. [Do folds (splits) have to be the same across estimators and stacking levels? How does `random_state` work?](https://github.com/vecxoz/vecstack#30-do-folds-splits-have-to-be-the-same-across-estimators-and-stacking-levels-how-does-random_state-work)
-31. [How does `vecstack.StackingTransformer` differ from `sklearn.ensemble.StackingClassifier`?](https://github.com/vecxoz/vecstack#31)
+31. [How does `vecstack.StackingTransformer` differ from `sklearn.ensemble.StackingClassifier`?](https://github.com/vecxoz/vecstack#31-how-does-vecstackstackingtransformer-differ-from-sklearnensemblestackingclassifier)
 
 ### 1. How can I report an issue? How can I ask a question about stacking or vecstack package?
 
@@ -410,13 +410,6 @@ It significantly differs. Please see a [detailed explanation](https://github.com
 9. You can also look at animation of [Variant A](https://github.com/vecxoz/vecstack#variant-a-animation) and [Variant B](https://github.com/vecxoz/vecstack#variant-b-animation).
 
 
-# References
-
-* [Ensemble Learning](https://en.wikipedia.org/wiki/Ensemble_learning) ([Stacking](https://en.wikipedia.org/wiki/Ensemble_learning#Stacking)) in Wikipedia
-* Classical [Kaggle Ensembling Guide](https://mlwave.com/kaggle-ensembling-guide/) or try [another link](https://web.archive.org/web/20210727094233/https://mlwave.com/kaggle-ensembling-guide/)
-* [Stacked Generalization](https://www.researchgate.net/publication/222467943_Stacked_Generalization) paper by David H. Wolpert
-
-
 # Variant A
 
 ![Fold 1 of 3](https://github.com/vecxoz/vecstack/raw/master/pic/dia1.png "Fold 1 of 3")
@@ -442,3 +435,10 @@ It significantly differs. Please see a [detailed explanation](https://github.com
 # Variant B. Animation
 
 ![Variant B. Animation](https://github.com/vecxoz/vecstack/raw/master/pic/animation2.gif "Variant B. Animation")
+
+
+# References
+
+* [Ensemble Learning](https://en.wikipedia.org/wiki/Ensemble_learning) ([Stacking](https://en.wikipedia.org/wiki/Ensemble_learning#Stacking)) in Wikipedia
+* Classical [Kaggle Ensembling Guide](https://mlwave.com/kaggle-ensembling-guide/) or try [another link](https://web.archive.org/web/20210727094233/https://mlwave.com/kaggle-ensembling-guide/)
+* [Stacked Generalization](https://www.researchgate.net/publication/222467943_Stacked_Generalization) paper by David H. Wolpert

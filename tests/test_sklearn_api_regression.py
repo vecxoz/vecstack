@@ -2042,6 +2042,48 @@ class TestSklearnRegression(unittest.TestCase):
         y_pred_rf = rf.fit(X_train, y_train).predict(X_train)
         assert_array_equal(S_train_sklearn, np.hstack([y_pred_et.reshape(-1, 1), y_pred_rf.reshape(-1, 1)]))
 
+    # -------------------------------------------------------------------------
+    # Added 20250924
+    # Explicitly check that `validate_data` checks number of features
+    # -------------------------------------------------------------------------
+    
+    def test_inconsistent_shape_passed_to_transform(self):
+        """
+        When transforming non-training set there was a check:
+        ```
+        if X.shape[1] != self.n_features_:
+            raise ValueError('Inconsistent number of features.')
+        ```
+        It was needed because I used `check_array` function to validate data
+        and probably number of features was not checked.
+        
+        Now I check data with `validate_data` which checks `self.n_features_in_`.
+        So my manual check can never happen and coverage dropped.
+        So I removed my manual check and created this test case to confirm explicitly that `validate_data` works.
+    
+        In version 0.4.0 there was no specific test for this case,
+        probably because it was included in `check_estimator`.
+        """
+        estimators = [
+            ('lr', LinearRegression()),
+            ('ridge', Ridge())]
+        
+        stack = StackingTransformer(estimators=estimators,
+                                    regression=True,
+                                    variant='B',
+                                    n_folds=5,
+                                    shuffle=False)
+        
+        stack = stack.fit(X_train, y_train)
+        S_train = stack.transform(X_train)  # OK
+        S_test = stack.transform(X_test)  # OK
+        
+        # Transform train set with different number of features - in fact it is identified as non-train set because shape is different
+        assert_raises(ValueError, stack.transform, X_train[:, 1:])
+        
+        # Transform test set with different number of features
+        assert_raises(ValueError, stack.transform, X_test[:, :-1])
+
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 

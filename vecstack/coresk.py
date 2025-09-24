@@ -755,9 +755,10 @@ class StackingTransformer(TransformerMixin, BaseEstimator):
         # Transform any other set
         # *********************************************************************
         else:
+            # Legacy check included in `validate_data`
             # Check n_features
-            if X.shape[1] != self.n_features_:
-                raise ValueError('Inconsistent number of features.')
+            # if X.shape[1] != self.n_features_:
+            #     raise ValueError('Inconsistent number of features.')
 
             # Create empty numpy array for test predictions
             S_test = np.zeros((X.shape[0], self.n_estimators_ * self.n_classes_implicit_))
