@@ -9,7 +9,7 @@ All details, FAQ, and tutorials: https://github.com/vecxoz/vecstack
 '''
 
 setup(name='vecstack',
-      version='0.5.0',
+      version='0.5.1',
       description='Python package for stacking (machine learning technique)',
       long_description=long_desc,
       classifiers=[
@@ -41,7 +41,7 @@ setup(name='vecstack',
       install_requires=[
           'numpy',
           'scipy',
-          'scikit-learn>=0.18'
+          'scikit-learn>=1.6.0'
       ],
       extras_require={
           'test': [

@@ -25,7 +25,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
     * Python 3.9+, [unofficial support for Python 2.7 and 3.4](https://github.com/vecxoz/vecstack/blob/master/PY2.md)
     * Win, Linux, Mac
     * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
-    * Depends on **numpy**, **scipy**, **scikit-learn>=0.18**
+    * Depends on **numpy**, **scipy**, **scikit-learn>=1.6.0**
 
 # Get started
 * [FAQ](https://github.com/vecxoz/vecstack#stacking-faq)

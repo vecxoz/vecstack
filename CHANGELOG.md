@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.5.1 -- September 28, 2025 -- Maintenance release
+
+Set minimum scikit-learn version to 1.6.0.
+Function `check_estimator` requires usage of `validate_data` which was introduced in 1.6.0
+
 ### v0.5.0 -- September 8, 2025 -- Maintenance release
 
 * Python 3.9+
