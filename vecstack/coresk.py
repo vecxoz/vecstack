@@ -78,6 +78,8 @@ class StackingTransformer(TransformerMixin, BaseEstimator):
         estimators = [('lr', LinearRegression()),
                       ('ridge', Ridge(random_state=0))]
 
+        Note. Dropping individual estimators using 'drop' is not supported.
+
         Note. According to sklearn convention for binary classification
             task with probabilities estimator must return probabilities
             for each class (i.e. two columns).

@@ -18,10 +18,10 @@ Convenient way to automate OOF computation, prediction and bagging using any num
     * And of course `FeatureUnion` is also invited to the party
 * Overall specs:
     * Use any sklearn-like estimators
-    * Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L85) tasks
-    * Predict [class labels or probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L121) in classification task
-    * Apply any [user-defined metric](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L126)
-    * Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L89) for target and prediction
+    * Perform [classification and regression](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L87) tasks
+    * Predict [class labels or probabilities](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L123) in classification task
+    * Apply any [user-defined metric](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L128)
+    * Apply any [user-defined transformations](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L91) for target and prediction
     * Python 3.9+, [unofficial support for Python 2.7 and 3.4](https://github.com/vecxoz/vecstack/blob/master/PY2.md)
     * Win, Linux, Mac
     * [MIT license](https://github.com/vecxoz/vecstack/blob/master/LICENSE.txt)
@@ -44,7 +44,7 @@ Convenient way to automate OOF computation, prediction and bagging using any num
         * [Regression + Multilevel stacking using Pipeline](https://github.com/vecxoz/vecstack/blob/master/examples/04_sklearn_api_regression_pipeline.ipynb)
 * Documentation:
     * [Functional API](https://github.com/vecxoz/vecstack/blob/master/vecstack/core.py#L133) or type ```>>> help(stacking)```
-    * [Scikit-learn API](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L66) or type ```>>> help(StackingTransformer)```
+    * [Scikit-learn API](https://github.com/vecxoz/vecstack/blob/master/vecstack/coresk.py#L68) or type ```>>> help(StackingTransformer)```
 
 # Installation
 
